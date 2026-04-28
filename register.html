@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style-login.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=undo" />
+</head>
+<body>
+    
+   <main class="register-page">
+    <div class="register-container">
+        <div class="pumblack">
+        <a href="index.html">
+            <span class="material-symbols-outlined">undo</span></a>
+    </div>
+        <h2>สมัครสมาชิก</h2>
+        <form action="/register" method="POST">
+            <div class="input-group">
+                <label>ชื่อ-นามสกุล</label>
+                <input type="text" name="reg_user" maxlength="15" placeholder="Full Name (maxlength15)" required>
+            </div>
+            <div class="input-group">
+                <label>รหัสผ่าน</label>
+                <input type="password" name="reg_pass" maxlength="15" placeholder="Password (maxlength15)" required>
+            </div>
+            <div class="input-group">
+                <label>ยืนยันรหัสผ่าน</label>
+                <input type="password" name="reg_confirm_pass" maxlength="15" placeholder="Confirm Password (maxlength15)" required>
+            </div>
+            
+            <button type="submit" class="register-btn">สร้างบัญชี</button>
+        </form>
+        
+        <p class="login-link">มีบัญชีอยู่แล้ว? <a href="login.html">เข้าสู่ระบบ</a></p>
+    </div>
+</main>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('status');
+    if (urlParams.get('status') === 'mismatch') {
+        const alertBox = document.createElement('div');
+        alertBox.className = 'custom-alert'; // ใช้ Class ที่บอสมี CSS อยู่แล้ว
+        alertBox.innerHTML = `
+            <span>รหัสผ่านไม่ตรงกัน</span>
+            <div class="progress-bar progress-active"></div>
+        `;
+        document.body.appendChild(alertBox);
+        setTimeout(() => {
+            alertBox.style.opacity = '0';
+            setTimeout(() => alertBox.remove(), 500);
+        }, 2000);
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    if (status) {
+        const alertBox = document.createElement('div');
+        alertBox.className = 'custom-alert'; // ใช้ CSS สีดำแถบส้ม-ฟ้าตัวเดิมของบอส
+        
+        let message = '';
+        
+        // เช็กว่าต้องโชว์ข้อความไหน
+        if (status === 'mismatch') {
+            message = 'รหัสผ่านไม่ตรงกันนะบอส! ลองเช็กอีกรอบครับ';
+        } else if (status === 'exists') {
+            message = 'ชื่อนี้มีคนใช้แล้วครับบอส! ลองเปลี่ยนชื่อดูนะ';
+        }
+
+        // ถ้ามีข้อความให้โชว์ ก็สร้างกล่องเลย
+        if (message) {
+            alertBox.innerHTML = `
+                <span>${message}</span>
+                <div class="progress-bar progress-active"></div>
+            `;
+            document.body.appendChild(alertBox);
+
+            // ตั้งเวลา 2 วินาทีให้จางหายไป
+            setTimeout(() => {
+                alertBox.style.opacity = '0';
+                setTimeout(() => alertBox.remove(), 500);
+            }, 2000);
+
+            // ลบ status ออกจาก URL เพื่อความสวยงาม
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }
+</script>
+
+</body>
+</html>
