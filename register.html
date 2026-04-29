@@ -37,52 +37,44 @@
     </div>
 </main>
 
-<script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBF5t68YK-QDAC026L6c_OFYeCP-y3RHoA",
+        authDomain: "wep-project-by-baross.firebaseapp.com",
+        databaseURL: "https://wep-project-by-baross-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "wep-project-by-baross",
+        storageBucket: "wep-project-by-baross.firebasestorage.app",
+        messagingSenderId: "561116818071",
+        appId: "1:561116818071:web:111006b44f0d0e8b3d57d2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
     const urlParams = new URLSearchParams(window.location.search);
     const status = urlParams.get('status');
-    if (urlParams.get('status') === 'mismatch') {
-        const alertBox = document.createElement('div');
-        alertBox.className = 'custom-alert'; // ใช้ Class ที่บอสมี CSS อยู่แล้ว
-        alertBox.innerHTML = `
-            <span>รหัสผ่านไม่ตรงกัน</span>
-            <div class="progress-bar progress-active"></div>
-        `;
-        document.body.appendChild(alertBox);
-        setTimeout(() => {
-            alertBox.style.opacity = '0';
-            setTimeout(() => alertBox.remove(), 500);
-        }, 2000);
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
 
     if (status) {
-        const alertBox = document.createElement('div');
-        alertBox.className = 'custom-alert'; // ใช้ CSS สีดำแถบส้ม-ฟ้าตัวเดิมของบอส
-        
         let message = '';
-        
-        // เช็กว่าต้องโชว์ข้อความไหน
-        if (status === 'mismatch') {
-            message = 'รหัสผ่านไม่ตรงกันนะบอส! ลองเช็กอีกรอบครับ';
-        } else if (status === 'exists') {
-            message = 'ชื่อนี้มีคนใช้แล้วครับบอส! ลองเปลี่ยนชื่อดูนะ';
-        }
+        if (status === 'mismatch') message = 'รหัสผ่านไม่ตรงกันนะบอส! ลองเช็กอีกรอบครับ';
+        else if (status === 'exists') message = 'ชื่อนี้มีคนใช้แล้วครับบอส! ลองเปลี่ยนชื่อดูนะ';
 
-        // ถ้ามีข้อความให้โชว์ ก็สร้างกล่องเลย
         if (message) {
-            alertBox.innerHTML = `
-                <span>${message}</span>
-                <div class="progress-bar progress-active"></div>
-            `;
+            const alertBox = document.createElement('div');
+            alertBox.className = 'custom-alert';
+            alertBox.innerHTML = `<span>${message}</span><div class="progress-bar progress-active"></div>`;
             document.body.appendChild(alertBox);
 
-            // ตั้งเวลา 2 วินาทีให้จางหายไป
+            // ส่ง Log รายงานปัญหาการสมัคร
+            push(ref(db, 'auth_logs'), { action: "Register Failed", cause: status, time: new Date().toLocaleString('th-TH') });
+
             setTimeout(() => {
                 alertBox.style.opacity = '0';
                 setTimeout(() => alertBox.remove(), 500);
             }, 2000);
-
-            // ลบ status ออกจาก URL เพื่อความสวยงาม
             window.history.replaceState({}, document.title, window.location.pathname);
         }
     }

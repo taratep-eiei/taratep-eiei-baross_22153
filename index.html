@@ -136,9 +136,8 @@
     </footer>
 
 <script type="module">
-    // --- [ส่วนที่ 0: ระบบ Firebase ดักจับ Error 405] ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBF5t68YK-QDAC026L6c_OFYeCP-y3RHoA",
@@ -153,130 +152,79 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // ฟังก์ชันสำหรับส่ง Error ไปที่ Firebase
-    function sendErrorToFirebase(message) {
-        const errorLogRef = ref(db, 'error_logs/405');
-        push(errorLogRef, {
-            url: window.location.href,
-            time: new Date().toLocaleString('th-TH'),
-            details: message,
-            user: localStorage.getItem('savedUsername') || 'Guest'
+    // --- ฟังก์ชันส่ง Log ไป Firebase ---
+    function sendLog(path, data) {
+        const logRef = ref(db, path);
+        push(logRef, {
+            ...data,
+            timestamp: new Date().toLocaleString('th-TH'),
+            url: window.location.href
         });
-        console.log("บันทึกข้อมูลเข้า Firebase แล้วครับบอส!");
     }
 
-    // ดักจับ Error ทั่วไป (รวมถึง 405 ที่อาจเกิดจาก Fetch)
+    // ดักจับ Error 405
     window.addEventListener('error', (e) => {
-        sendErrorToFirebase(e.message);
+        sendLog('error_logs/405', { details: e.message, user: localStorage.getItem('savedUsername') || 'Guest' });
     }, true);
 
+    // --- ระบบ Sidebar & UI เดิมของบอส ---
+    window.openNav = () => { document.getElementById("mySidebar").style.width = "320px"; };
+    window.closeNav = () => { document.getElementById("mySidebar").style.width = "0"; };
 
-    // --- 1. ฟังก์ชันเปิด/ปิด Sidebar ---
-    window.openNav = function() {
-        const sidebar = document.getElementById("mySidebar");
-        if (sidebar) sidebar.style.width = "320px";
-    }
-
-    window.closeNav = function() {
-        const sidebar = document.getElementById("mySidebar");
-        if (sidebar) sidebar.style.width = "0";
-    }
-
-    // --- 2. ฟีเจอร์: กดที่ว่างแล้วหุบเมนู ---
-    window.addEventListener('click', function(e) {
+    window.addEventListener('click', (e) => {
         const sidebar = document.getElementById("mySidebar");
         const loginBtn = document.getElementById('login-btn');
-        if (sidebar && sidebar.style.width === "320px") {
-            if (!sidebar.contains(e.target) && !loginBtn.contains(e.target)) {
-                closeNav();
-            }
-        }
+        if (sidebar?.style.width === "320px" && !sidebar.contains(e.target) && !loginBtn.contains(e.target)) closeNav();
     });
 
-    // --- 3. ระบบหลัก (Init) ---
-    function initApp() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const nameFromUrl = urlParams.get('user');
-        if (nameFromUrl) {
-            localStorage.setItem('savedUsername', nameFromUrl);
-        }
-
+    window.onload = () => {
         const savedName = localStorage.getItem('savedUsername');
         const savedPic = localStorage.getItem('userProfilePic');
-
-        const loginBtn = document.getElementById('login-btn');
-        const navUsername = document.getElementById('nav-username');
-        const navImg = document.getElementById('nav-profile-img');
-        const logoutBtn = document.getElementById('logout-btn');
-        const mainImg = document.getElementById('main-profile-img');
-        const sideUserText = document.getElementById('side-username');
-
-        if (savedPic) {
-            if (mainImg) mainImg.src = savedPic;
-            if (navImg) {
-                navImg.src = savedPic;
-                navImg.style.display = "inline-block";
-            }
-        }
-
+        
+        // ถ้ามีการ Login เข้ามา ให้เก็บ Log ทันที
         if (savedName) {
+            sendLog('activity_logs/visits', { username: savedName, action: "เข้าสู่หน้าหลัก" });
+            
+            const loginBtn = document.getElementById('login-btn');
             if (loginBtn) {
                 loginBtn.href = "javascript:void(0)";
                 loginBtn.onclick = openNav;
                 loginBtn.style.color = "#00c6ff";
             }
-            if (navUsername) navUsername.innerText = savedName;
-            if (sideUserText) sideUserText.innerText = savedName;
+            document.getElementById('nav-username').innerText = savedName;
+            document.getElementById('side-username').innerText = savedName;
+            
+            const logoutBtn = document.getElementById('logout-btn');
             if (logoutBtn) {
                 logoutBtn.style.display = "inline-block";
-                logoutBtn.onclick = function() {
+                logoutBtn.onclick = () => {
                     localStorage.removeItem('savedUsername');
                     window.location.href = "index.html";
                 };
             }
-        } else {
-            if (loginBtn) {
-                loginBtn.href = "login.html";
-                loginBtn.onclick = null;
-            }
-            if (navUsername) navUsername.innerText = "เข้าสู่ระบบ";
-            if (navImg) navImg.style.display = "none";
-            if (logoutBtn) logoutBtn.style.display = "none";
         }
-    }
+        
+        if (savedPic) {
+            document.getElementById('main-profile-img').src = savedPic;
+            const navImg = document.getElementById('nav-profile-img');
+            if (navImg) { navImg.src = savedPic; navImg.style.display = "inline-block"; }
+        }
+    };
 
-    // --- 4. ระบบเปลี่ยนรูป ---
-    const uploadInput = document.getElementById('upload-photo');
-    if (uploadInput) {
-        uploadInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const data = event.target.result;
-                    localStorage.setItem('userProfilePic', data);
-                    document.getElementById('main-profile-img').src = data;
-                    const ni = document.getElementById('nav-profile-img');
-                    ni.src = data;
-                    ni.style.display = "inline-block";
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-
-    window.onload = initApp;
-
-    // ระบบสลับรูปภาพ
-    window.switchPhoto = function(clickedImg) {
-        const stack = document.getElementById('photoStack');
-        const centerImg = stack.querySelector('.img-center');
-        if (clickedImg === centerImg) return;
-        const clickedClass = clickedImg.className;
-        const centerClass = centerImg.className;
-        clickedImg.className = centerClass;
-        centerImg.className = clickedClass;
-    }
+    // ระบบเปลี่ยนรูป
+    document.getElementById('upload-photo')?.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const data = event.target.result;
+                localStorage.setItem('userProfilePic', data);
+                document.getElementById('main-profile-img').src = data;
+                document.getElementById('nav-profile-img').src = data;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
 </script>
 
 </body>

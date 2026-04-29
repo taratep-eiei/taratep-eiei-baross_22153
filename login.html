@@ -33,25 +33,41 @@
 
     <link rel="stylesheet" href="alert-style.css">
 
-<script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBF5t68YK-QDAC026L6c_OFYeCP-y3RHoA",
+        authDomain: "wep-project-by-baross.firebaseapp.com",
+        databaseURL: "https://wep-project-by-baross-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "wep-project-by-baross",
+        storageBucket: "wep-project-by-baross.firebasestorage.app",
+        messagingSenderId: "561116818071",
+        appId: "1:561116818071:web:111006b44f0d0e8b3d57d2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // ระบบแจ้งเตือน (Alert) และส่ง Log
     const urlParams = new URLSearchParams(window.location.search);
-    
-    if (urlParams.get('status') === 'registered') {
-        // สร้างกล่องแจ้งเตือน
+    const status = urlParams.get('status');
+
+    if (status === 'registered') {
         const alertBox = document.createElement('div');
         alertBox.className = 'custom-alert';
-        alertBox.innerHTML = `
-            <span>สมัครสมาชิกสำเร็จ! เข้าสู่ระบบได้เลย</span>
-            <div class="progress-bar progress-active"></div>
-        `;
-        
+        alertBox.innerHTML = `<span>สมัครสมาชิกสำเร็จ! เข้าสู่ระบบได้เลย</span><div class="progress-bar progress-active"></div>`;
         document.body.appendChild(alertBox);
 
-        // ตั้งเวลา 2 วินาที (เท่ากับ Animation) แล้วให้หายไป
+        // ส่ง Log บอกบอสว่ามีสมาชิกใหม่
+        push(ref(db, 'auth_logs'), { action: "Register Success", time: new Date().toLocaleString('th-TH') });
+
         setTimeout(() => {
             alertBox.style.opacity = '0';
             setTimeout(() => alertBox.remove(), 500);
         }, 2000);
+        window.history.replaceState({}, document.title, window.location.pathname);
     }
 </script>
 </main>
