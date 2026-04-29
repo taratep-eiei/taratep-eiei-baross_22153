@@ -115,7 +115,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // --- 1. สลับรูป ---
+    // --- 1. ระบบสลับรูป (Carousel) ---
     window.switchPhoto = function(el) {
         if (el.classList.contains('img-center')) return;
         const container = document.getElementById('photoStack');
@@ -125,29 +125,76 @@
         if (center && currentClass) {
             center.classList.replace('img-center', currentClass);
             el.classList.replace(currentClass, 'img-center');
-            push(ref(db, 'activity_logs/carousel'), { action: `สลับ ${currentClass}`, time: new Date().toLocaleString() });
+            // ส่ง Log ไป Firebase
+            push(ref(db, 'activity_logs/carousel'), { 
+                action: `สลับรูปไปที่ ${currentClass}`, 
+                time: new Date().toLocaleString() 
+            });
         }
     };
 
-    // --- 2. ระบบ Logic (แก้ไขเน้นๆ) ---
+    // --- 2. ระบบ Login & Sidebar ---
     document.addEventListener('DOMContentLoaded', () => {
         const savedName = localStorage.getItem('savedUsername');
         const loginBtn = document.getElementById('login-btn');
         const navUser = document.getElementById('nav-username');
         const sideUser = document.getElementById('side-username');
         const sidebar = document.getElementById("mySidebar");
+        const navProfileImg = document.getElementById('nav-profile-img');
+        const mainProfileImg = document.getElementById('main-profile-img');
 
+        // เช็คว่า Login หรือยัง
         if (savedName) {
             navUser.innerText = savedName;
             sideUser.innerText = savedName;
             loginBtn.href = "javascript:void(0)";
+            
+            // คลิกที่ชื่อ/รูปใน Navbar เพื่อเปิด Sidebar
             loginBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 sidebar.style.width = "320px";
             });
             document.getElementById('logout-btn').style.display = "inline-block";
+
+            // ดึงรูปโปรไฟล์ที่เคยเซฟไว้ (ถ้ามี)
+            const savedImg = localStorage.getItem('userProfilePic');
+            if (savedImg) {
+                mainProfileImg.src = savedImg;
+                navProfileImg.src = savedImg;
+                navProfileImg.style.display = "inline-block";
+            }
         } else {
-            loginBtn.href = "login.html"; // ถ้าไม่ login ให้ไปหน้า login
+            loginBtn.href = "login.html";
+        }
+
+        // --- 3. ระบบอัปโหลด/เปลี่ยนรูปโปรไฟล์ ---
+        const uploadInput = document.getElementById('upload-photo');
+        if (uploadInput) {
+            uploadInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const imageData = event.target.result;
+                        
+                        // แสดงรูปทันที
+                        mainProfileImg.src = imageData;
+                        navProfileImg.src = imageData;
+                        navProfileImg.style.display = "inline-block";
+
+                        // บันทึกไว้ในเครื่อง
+                        localStorage.setItem('userProfilePic', imageData);
+
+                        // ส่ง Log
+                        push(ref(db, 'activity_logs/profile'), { 
+                            action: "Change Profile Picture", 
+                            user: savedName || "Guest",
+                            time: new Date().toLocaleString() 
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
         }
 
         // ปิด Sidebar เมื่อคลิกข้างนอก
@@ -161,6 +208,7 @@
     // ปุ่ม Logout
     document.getElementById('logout-btn').onclick = () => {
         localStorage.removeItem('savedUsername');
+        localStorage.removeItem('userProfilePic'); // ลบรูปออกตอน Logout (หรือจะไม่ลบก็ได้ครับบอส)
         location.reload();
     };
 </script>
