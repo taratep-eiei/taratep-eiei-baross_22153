@@ -135,8 +135,8 @@
         <p>&copy; 2026 baross. All rights reserved.</p>
     </footer>
 
- <script type="module">
-    // --- 1. ตั้งค่า Firebase (ข้อมูลจากรูป image_8b7d51.png และ image_8b978f.png) ---
+<script type="module">
+    // --- 1. ระบบ Firebase (ดึงมาจากโปรเจกต์บอส) ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
     import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
 
@@ -153,94 +153,55 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // ฟังก์ชันส่ง Log (จะทำงานเฉพาะตอนที่บอสสั่งเท่านั้น)
-    function sendLog(path, data) {
-        const logRef = ref(db, path);
-        push(logRef, {
-            ...data,
-            timestamp: new Date().toLocaleString('th-TH'),
-            url: window.location.href
-        });
-    }
+    // --- 2. ฟังก์ชันสลับตำแหน่ง (Swap Position) ---
+    window.switchPhoto = function(clickedElement) {
+        // ถ้ากดตัวที่อยู่ตรงกลางอยู่แล้ว ไม่ต้องทำอะไร
+        if (clickedElement.classList.contains('img-center')) return;
 
-    // --- 2. ฟังก์ชันเปิด/ปิด Sidebar (แบบล็อกกุญแจ) ---
-    window.openNav = function() {
-        const savedName = localStorage.getItem('savedUsername');
+        const container = document.getElementById('photoStack');
+        const currentCenter = container.querySelector('.img-center');
         
-        // ถ้าไม่มีชื่อ (ยังไม่ Login) ให้เด้งไปหน้า Login ทันที ไม่ยอมให้เปิดเมนู Guest แบบในรูป image_8aaebb.jpg
-        if (!savedName) {
-            window.location.href = "login.html";
-            return;
+        // รายชื่อคลาสตำแหน่งทั้งหมด
+        const posClasses = ['img-left-far', 'img-left', 'img-center', 'img-right', 'img-right-far'];
+
+        // หาคลาสปัจจุบันของตัวที่บอสกด
+        const clickedClass = posClasses.find(c => clickedElement.classList.contains(c));
+
+        if (currentCenter && clickedClass) {
+            // สลับคลาสกันแบบดื้อๆ เลยครับ
+            // 1. เอาตัวกลางเดิม ไปอยู่ที่ตำแหน่งของตัวที่กด
+            currentCenter.classList.remove('img-center');
+            currentCenter.classList.add(clickedClass);
+
+            // 2. เอาตัวที่กด มาอยู่ที่ตำแหน่งตรงกลาง
+            clickedElement.classList.remove(clickedClass);
+            clickedElement.classList.add('img-center');
+
+            // ส่ง Log ไปบอก Firebase ว่าบอสสลับรูปแล้ว
+            push(ref(db, 'activity_logs/carousel'), {
+                action: `สลับ ${clickedClass} มาเป็นตัวกลาง`,
+                timestamp: new Date().toLocaleString('th-TH')
+            });
         }
-
-        const sidebar = document.getElementById("mySidebar");
-        if (sidebar) sidebar.style.width = "320px";
     };
 
-    window.closeNav = function() {
-        const sidebar = document.getElementById("mySidebar");
-        if (sidebar) sidebar.style.width = "0";
-    };
-
-    // --- 3. ระบบจัดการหน้าเว็บเมื่อโหลด (Init) ---
+    // --- 3. ระบบ Sidebar & Login (ตัวเดิมของบอส) ---
     window.onload = function() {
         const savedName = localStorage.getItem('savedUsername');
-        const savedPic = localStorage.getItem('userProfilePic');
-        
-        // ตรวจสอบสถานะการ Login
         if (savedName) {
-            // กรณี: Login แล้ว (ให้แสดงชื่อบอสและเตรียมระบบ Sidebar)
+            const navUser = document.getElementById('nav-username');
+            if (navUser) navUser.innerText = savedName;
+            
             const loginBtn = document.getElementById('login-btn');
             if (loginBtn) {
                 loginBtn.href = "javascript:void(0)";
-                loginBtn.onclick = openNav;
-                loginBtn.style.color = "#00c6ff";
-            }
-            
-            const navUser = document.getElementById('nav-username');
-            const sideUser = document.getElementById('side-username');
-            if (navUser) navUser.innerText = savedName;
-            if (sideUser) sideUser.innerText = savedName;
-
-            // บันทึก Log เฉพาะตอนที่ Login อยู่จริงๆ
-            sendLog('activity_logs/visits', { username: savedName, action: "เข้าสู่หน้าหลัก" });
-
-            const logoutBtn = document.getElementById('logout-btn');
-            if (logoutBtn) {
-                logoutBtn.style.display = "inline-block";
-                logoutBtn.onclick = function() {
-                    localStorage.removeItem('savedUsername');
-                    window.location.href = "index.html"; // รีเซ็ตหน้าเว็บ
+                loginBtn.onclick = () => { 
+                    const sb = document.getElementById("mySidebar");
+                    if(sb) sb.style.width = "320px";
                 };
             }
-        } else {
-            // กรณี: ยังไม่ได้ Login (ให้ปุ่มเป็น Link ไปหน้า Login ปกติ)
-            const loginBtn = document.getElementById('login-btn');
-            if (loginBtn) {
-                loginBtn.href = "login.html";
-                loginBtn.onclick = null; // ปิดฟังก์ชันเปิด Sidebar
-            }
-            console.log("ยังไม่ Login: เมนูถูกล็อกไว้ครับบอส");
-        }
-
-        if (savedPic) {
-            const mainImg = document.getElementById('main-profile-img');
-            const navImg = document.getElementById('nav-profile-img');
-            if (mainImg) mainImg.src = savedPic;
-            if (navImg) { navImg.src = savedPic; navImg.style.display = "inline-block"; }
         }
     };
-
-    // --- 4. ดักจับ Error (เฉพาะตอนที่มีการใช้งานจริง) ---
-    window.addEventListener('error', (e) => {
-        const savedName = localStorage.getItem('savedUsername');
-        if (savedName) { // ส่ง Log เฉพาะตอน Login แล้วเท่านั้น
-            sendLog('error_logs/system', { 
-                details: e.message, 
-                user: savedName 
-            });
-        }
-    }, true);
 </script>
 
 </body>

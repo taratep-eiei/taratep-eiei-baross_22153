@@ -11,27 +11,31 @@
     
     <main class="login-page">
     <div class="login-container">
-        
         <div class="pumblack">
-        <a href="index.html">
-            <span class="material-symbols-outlined">undo</span></a>
-    </div>
-    <div class="pum" ><h2>เข้าสู่ระบบ</h2></div>
-        <form action="/login" method="POST">
+            <a href="index.html">
+                <span class="material-symbols-outlined">undo</span>
+            </a>
+        </div>
+        <div class="pum"><h2>เข้าสู่ระบบ</h2></div>
+        
+        <!-- เอา action ออกเพื่อให้ JS ทำงานแทนครับบอส -->
+        <form id="login-form">
             <div class="input-group">
                 <label>ชื่อผู้ใช้งาน</label>
-                <input type="text" name="username" placeholder="Username" required>
+                <!-- เพิ่ม id="username-input" -->
+                <input type="text" id="username-input" name="username" placeholder="Username" required>
             </div>
             <div class="input-group">
                 <label>รหัสผ่าน</label>
                 <input type="password" name="password" placeholder="Password" required>
             </div>
-            <button type="submit" class="login-btn">Login</button>
+            <!-- เพิ่ม id="login-btn-main" -->
+            <button type="submit" id="login-btn-main" class="login-btn">Login</button>
         </form>
         <p class="register-link">ยังไม่มีบัญชี? <a href="register.html">สมัครสมาชิก</a></p>
     </div>
-
-    <link rel="stylesheet" href="alert-style.css">
+</main>
+<link rel="stylesheet" href="alert-style.css">
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
@@ -50,7 +54,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // ระบบแจ้งเตือน (Alert) และส่ง Log
+    // --- ส่วนแจ้งเตือนสมัครสมาชิกสำเร็จ ---
     const urlParams = new URLSearchParams(window.location.search);
     const status = urlParams.get('status');
 
@@ -60,7 +64,6 @@
         alertBox.innerHTML = `<span>สมัครสมาชิกสำเร็จ! เข้าสู่ระบบได้เลย</span><div class="progress-bar progress-active"></div>`;
         document.body.appendChild(alertBox);
 
-        // ส่ง Log บอกบอสว่ามีสมาชิกใหม่
         push(ref(db, 'auth_logs'), { action: "Register Success", time: new Date().toLocaleString('th-TH') });
 
         setTimeout(() => {
@@ -68,6 +71,35 @@
             setTimeout(() => alertBox.remove(), 500);
         }, 2000);
         window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // --- ส่วนควบคุมการ Login ---
+    const loginBtn = document.getElementById('login-btn-main');
+    const userInput = document.getElementById('username-input');
+
+    if (loginBtn) {
+        loginBtn.addEventListener('click', (e) => {
+            e.preventDefault(); // กันหน้าเว็บรีเฟรชก่อนบันทึกข้อมูล
+            
+            const username = userInput ? userInput.value : "";
+
+            if (username.trim() !== "") {
+                // 1. บันทึกชื่อลงเครื่อง
+                localStorage.setItem('savedUsername', username);
+                
+                // 2. ส่ง Log ไป Firebase
+                push(ref(db, 'auth_logs'), { 
+                    action: "Login Success", 
+                    user: username, 
+                    time: new Date().toLocaleString('th-TH') 
+                });
+
+                // 3. วาร์ปไปหน้าหลัก
+                window.location.href = "index.html";
+            } else {
+                alert("กรุณากรอกชื่อผู้ใช้งานด้วยครับบอส!");
+            }
+        });
     }
 </script>
 </main>
