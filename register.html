@@ -11,21 +11,23 @@
     
 <main class="register-page">
     <div class="register-container">
+        <!-- 🔙 ปุ่มย้อนกลับ (เน้นให้กดง่ายขึ้น) -->
         <div class="pumblack">
-            <a href="login.html"> <!-- ✅ เปลี่ยนให้ย้อนกลับไปหน้า Login แทนหน้าแรกเพื่อความสะดวก -->
+            <a href="login.html" id="back-to-login">
                 <span class="material-symbols-outlined">undo</span>
             </a>
         </div>
+        
         <h2>สมัครสมาชิก</h2>
         
         <div id="register-form-box">
             <div class="input-group">
                 <label>ชื่อผู้ใช้ (Username)</label>
-                <input type="text" id="reg_user" maxlength="15" placeholder="Username" required>
+                <input type="text" id="reg_user" maxlength="15" placeholder="Username (max15)" required>
             </div>
             <div class="input-group">
                 <label>รหัสผ่าน</label>
-                <input type="password" id="reg_pass" maxlength="15" placeholder="Password" required>
+                <input type="password" id="reg_pass" maxlength="15" placeholder="Password (max15)" required>
             </div>
             <div class="input-group">
                 <label>ยืนยันรหัสผ่าน</label>
@@ -35,7 +37,10 @@
             <button type="button" id="btn-create-acc" class="register-btn">สร้างบัญชี</button>
         </div>
         
-        <p class="login-link">มีบัญชีอยู่แล้ว? <a href="login.html">เข้าสู่ระบบ</a></p>
+        <!-- 🔗 ปุ่มเข้าสู่ระบบ (จุดที่มีปัญหา) -->
+        <p class="login-link">
+            มีบัญชีอยู่แล้ว? <a href="login.html" id="direct-login-link">เข้าสู่ระบบ</a>
+        </p>
     </div>
 </main>
 
@@ -56,6 +61,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
+    // --- 🟢 ระบบสมัครสมาชิก (เน้นวาร์ปชัวร์) ---
     document.getElementById('btn-create-acc').onclick = async () => {
         const user = document.getElementById('reg_user').value.trim();
         const pass = document.getElementById('reg_pass').value;
@@ -73,34 +79,35 @@
         const userRef = ref(db, 'users/' + user);
 
         try {
-            // 1. เช็คว่าชื่อซ้ำไหม
             const snapshot = await get(userRef);
             if (snapshot.exists()) {
-                alert("ชื่อนี้มีคนใช้แล้วครับบอส! ลองเปลี่ยนชื่อนะ");
+                alert("ชื่อนี้มีคนใช้แล้วครับบอส!");
                 return;
             }
 
-            // 2. บันทึกข้อมูล (ใช้ await เพื่อให้มั่นใจว่าเสร็จชัวร์)
+            // บันทึกข้อมูล
             await set(userRef, {
                 password: pass,
                 reg_date: new Date().toLocaleString('th-TH')
             });
             
-            // 3. บันทึก Log
-            await push(ref(db, 'auth_logs'), { 
-                action: "Register Success", 
-                user: user, 
-                time: new Date().toLocaleString('th-TH') 
-            });
+            // ส่ง Log
+            await push(ref(db, 'auth_logs'), { action: "Register Success", user: user });
 
-            // 4. ✅ วาร์ปทันทีเมื่อทุกอย่างสำเร็จ
-            console.log("Registration Successful! Redirecting...");
-            window.location.assign("login.html?status=registered");
+            // วาร์ปทันที (หน้า Login จะเป็นคนทำแถบโหลดเอง)
+            window.location.href = "login.html?status=registered";
 
         } catch (error) {
-            console.error("Firebase Error:", error);
             alert("เกิดข้อผิดพลาด: " + error.message);
         }
+    };
+
+    // ✅ Force Click: ถ้า Link ธรรมดาไม่ไป ให้ใช้ JS สั่งวาร์ป
+    document.getElementById('direct-login-link').onclick = (e) => {
+        window.location.href = "login.html";
+    };
+    document.getElementById('back-to-login').onclick = (e) => {
+        window.location.href = "login.html";
     };
 </script>
 </body>
