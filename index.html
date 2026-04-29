@@ -64,7 +64,6 @@
         <div class="sidebar-content">
             <div class="profile-section">
                 <label for="upload-photo" class="upload-label">
-                    <!-- รูปเริ่มต้นถ้าไม่มีรูปในเครื่อง -->
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Baross" alt="Profile" class="side-img" id="main-profile-img">
                     <div class="upload-text">คลิกเพื่อเปลี่ยนรูป</div>
                 </label>
@@ -116,7 +115,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // --- 1. ระบบสลับรูป (Carousel) ---
     window.switchPhoto = function(el) {
         if (el.classList.contains('img-center')) return;
         const container = document.getElementById('photoStack');
@@ -133,7 +131,6 @@
         }
     };
 
-    // --- 2. ฟังก์ชันอัปเดต UI โปรไฟล์ ---
     const updateProfileUI = (name, photoData) => {
         const navUser = document.getElementById('nav-username');
         const sideUser = document.getElementById('side-username');
@@ -151,10 +148,13 @@
                 navProfileImg.src = photoData;
                 navProfileImg.style.display = "inline-block";
             }
+        } else {
+            // ถ้ารูปเป็น null ให้กลับไปใช้รูป Default
+            if (mainProfileImg) mainProfileImg.src = "https://api.dicebear.com/7.x/avataaars/svg?seed=Baross";
+            if (navProfileImg) navProfileImg.style.display = "none";
         }
     };
 
-    // --- 3. เริ่มต้นระบบทั้งหมด ---
     const initApp = () => {
         const savedName = localStorage.getItem('savedUsername');
         const savedImg = localStorage.getItem('userProfilePic');
@@ -162,12 +162,11 @@
         const sidebar = document.getElementById("mySidebar");
         const uploadInput = document.getElementById('upload-photo');
 
-        // 🔥 แสดงรูปทันทีถ้ามีเซฟไว้ในเครื่อง (ไม่ต้องรอ Login)
+        // แสดงรูปที่ค้างในเครื่อง (ถ้ามี)
         if (savedImg) {
             updateProfileUI(null, savedImg);
         }
 
-        // เช็คสถานะ Login
         if (savedName) {
             updateProfileUI(savedName, null);
             loginBtn.href = "javascript:void(0)";
@@ -178,7 +177,6 @@
             document.getElementById('logout-btn').style.display = "inline-block";
         }
 
-        // ระบบอัปโหลดรูป
         if (uploadInput) {
             uploadInput.onchange = (e) => {
                 const file = e.target.files[0];
@@ -187,13 +185,11 @@
                         alert("รูปใหญ่เกินไปครับบอส! เลือกรูปไม่เกิน 2MB นะครับ");
                         return;
                     }
-
                     const reader = new FileReader();
                     reader.onload = (event) => {
                         const imageData = event.target.result;
                         updateProfileUI(null, imageData);
                         localStorage.setItem('userProfilePic', imageData);
-
                         push(ref(db, 'activity_logs/profile'), { 
                             action: "Change Profile Picture", 
                             user: savedName || "Guest",
@@ -205,7 +201,6 @@
             };
         }
 
-        // ปิด Sidebar เมื่อคลิกข้างนอก
         window.onclick = (e) => {
             if (sidebar && sidebar.style.width === "320px") {
                 if (!sidebar.contains(e.target) && !loginBtn.contains(e.target)) {
@@ -217,10 +212,11 @@
 
     initApp();
 
-    // --- 4. ปุ่ม Logout (เก็บรูปไว้ ไม่ลบแล้ว) ---
+    // --- จุดสำคัญ: ปุ่ม Logout ที่ล้างทั้งชื่อและรูป ---
     document.getElementById('logout-btn').onclick = () => {
-        localStorage.removeItem('savedUsername'); // ลบแค่ชื่อ
-        location.reload(); // รีเฟรชหน้า
+        localStorage.removeItem('savedUsername'); // ลบชื่อ
+        localStorage.removeItem('userProfilePic'); // ล้างรูปทิ้ง เพื่อให้ User คนถัดไปไม่เห็นรูปเดิม
+        location.reload();
     };
 </script>
 </body>
