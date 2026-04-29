@@ -1,0 +1,446 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+/* --- 1. Global Settings --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color:#000000 !important ;
+    font-family: "Kanit", sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    display: block;
+    min-width: 600px;
+    overflow-x: auto;
+
+    background-image: 
+        /* แสงวงที่ 1 (สีฟ้า) จางๆ นวลๆ อยู่มุมบนซ้าย */
+        radial-gradient(at top left, #5f84ffb2, transparent 75%),
+        /* แสงวงที่ 2 (สีส้ม) จางๆ นวลๆ อยู่มุมล่างขวา */
+        radial-gradient(at bottom right, #feb47bad, transparent 75%);
+    
+    background-attachment: fixed;
+}
+
+/* --- 2. Icons Support --- */
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 700, 'GRAD' 0, 'opsz' 30;
+    color: white; 
+    cursor: pointer;
+    transition: color 0.3s ease;
+    vertical-align: middle;
+}
+
+/* --- 3. Header & Navigation --- */
+header {
+    background-color: #1c1c1c;
+    color: white;
+    padding: 16px;
+    text-align: center;
+}
+
+nav {
+    background-color: #292929;
+    padding: 5px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    white-space: nowrap; 
+    min-width: 600px;
+    border-top: 2px solid #434343;
+    border-bottom: 2px solid #4d4d4d;
+    display: flex;
+    align-items: center;
+}
+
+nav a {
+    color: white;  
+    text-decoration: none;
+    padding: 5px 20px;
+    transition: all 0.4s ease;
+}
+
+.nav-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+nav .Home, .About, .Services, .Contact {
+    font-weight: bold;
+    position: relative;
+    display: inline-block;
+}
+
+.step-line {
+    color: rgb(255, 255, 255);
+    margin: 0 10px;
+}
+
+/* --- 4. Hover Effects (4 ปุ่มหน้า) --- */
+nav .Home > a:hover, 
+nav .About > a:hover, 
+nav .Services > a:hover, 
+nav .Contact > a:hover {
+    color: rgb(0, 0, 0);
+    background-color: rgb(255, 255, 255);
+    border-radius: 12px;
+    box-shadow: 0px 0px 17px 3px rgb(255, 255, 255);
+}
+
+/* --- 5. Submenu Section --- */
+.supmenu {
+    display: none;
+    position: absolute;
+    z-index: 100;
+    font-size: 13px;
+    width: 110px;
+    background-color: rgba(78, 78, 78, 0.9);
+    border: 3px solid #000;
+    border-radius: 5px;
+    list-style: none;
+    padding: 5px 0;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: column;
+}
+
+.Home:hover .supmenu, .About:hover .supmenu, .Services:hover .supmenu, .Contact:hover .supmenu {
+    display: flex;
+}
+
+.supmenu li {
+    width: 100%;
+    text-align: center;
+    padding: 8px 0;
+}
+
+.supmenu li a {
+    color: white;
+    display: block;
+}
+
+.supmenu li a:hover {
+    background-color: silver;
+    color: black;
+    border-radius: 0px; 
+    box-shadow: none;
+}
+
+/* ปรับระยะ submenu ให้ตรง */
+.Home .supmenu, .About .supmenu, .Services .supmenu { margin-left: -13.5px; }
+.Contact .supmenu { margin-left: 1.5px; }
+
+/* --- 6. Login & Logout Section (No Glow) --- */
+/* --- 1. โซน Login & User (แถบเมนูข้างบน) --- */
+.login {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-right: 20px;
+}
+
+#login-btn, #logout-btn {
+    transition: color 0.3s ease;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+/* ปิดแสงขาวและพื้นหลังขาวถาวรสำหรับโซนนี้ */
+.login a:hover {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    text-decoration: none;
+}
+
+#login-btn:hover {
+    color: #00c6ff !important;
+}
+
+#login-btn:hover .material-symbols-outlined {
+    color: #00c6ff !important;
+}
+
+#logout-btn:hover {
+    color: #ff4b4b !important;
+}
+
+/* --- 2. โซน Sidebar (แถบข้าง) --- */
+.sidebar {
+    height: 100%;
+    width: 0; 
+    position: fixed;
+    z-index: 1001;
+    top: 0;
+    right: 0;
+    background-color: #111;
+    overflow-x: hidden;
+    transition: 0.5s ease;
+    padding-top: 60px;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+}
+
+.sidebar-content {
+    padding: 20px;
+    text-align: center;
+}
+
+.closebtn {
+    position: absolute;
+    top: 10px;
+    right: 25px;
+    font-size: 36px;
+    color: white;
+    text-decoration: none;
+}
+
+/* --- 3. โซนรูปโปรไฟล์ (จุดที่ทำให้รูปเปลี่ยนได้) --- */
+.profile-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ตัวครอบรูปเพื่อให้กดได้ */
+.upload-label {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.3s ease;
+}
+
+.upload-label:hover {
+    transform: scale(1.05);
+}
+
+.side-img {
+    width: 100px; /* ขยายให้ใหญ่นิดนึงบอสจะได้รับรูปถนัด */
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid #00c6ff; /* หนาขึ้นนิดนึงให้เท่แบบบอส */
+    margin-bottom: 10px;
+    object-fit: cover; /* สำคัญมาก: กันรูปเบี้ยวพอบอสอัปรูปใหม่ */
+    transition: filter 0.3s;
+}
+
+.upload-label:hover .side-img {
+    filter: brightness(0.7);
+}
+
+.upload-text {
+    font-size: 10px;
+    color: #00c6ff;
+    margin-top: 5px;
+}
+
+.status-text {
+    color: #00c6ff;
+    font-size: 12px;
+}
+
+/* --- 4. โซนข้อมูล Dashboard --- */
+.sidebar-divider {
+    border: 0;
+    border-top: 0.5px solid #444;
+    margin: 30px 0;
+}
+
+.sidebar-info-card {
+    padding: 20px;
+    background-color: #1a1a1a;
+    border-radius: 12px;
+    text-align: left;
+}
+
+.info-card-title {
+    color: #00c6ff;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.info-card-detail {
+    color: #888;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+#nav-profile-img {
+    border: 1.5px solid #00c6ff; /* ขอบฟ้าบางๆ ให้เข้ากับธีม */
+    vertical-align: middle;
+}
+
+#login-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* เว้นระยะห่างรูปกับชื่อ */
+}
+
+/* --- 7. Main Content --- */
+main {
+    padding: 20px 20px;
+    min-height: 1000px;
+}
+
+.main-container {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 22px;
+    box-shadow: 0px 0px 9px 3px rgb(255, 255, 255);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.main-info {
+    margin-top: 15px;
+    color: #000000;
+    line-height: 1.6;
+}
+
+.main-btn {
+    display: inline-block;
+    background: linear-gradient(to right, #5f84ff, #feb47b);
+    color: white;
+    padding: 10px 30px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+}
+
+.main-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0px 5px 15px rgba(0,0,0,0.3);
+}
+
+/* --- ส่วนจัดวางรูปภาพกระจาย 3D --- */
+.photo-spread-section {
+    width: 100%;
+    max-width: 1000px; /* จำกัดความกว้างไม่ให้ล้น */
+    margin: 40px auto; /* เว้นระยะจากกล่อง abcd บน */
+    perspective: 1000px; /* สำคัญมาก: เพื่อให้เห็นมิติ 3D */
+    display: flex;
+    justify-content: center;
+    padding: 5px 0; /* เว้นพื้นที่ให้แสงฟุ้ง */
+}
+
+.photo-container {
+    position: relative;
+    width: 600px; /* ความกว้างของพื้นที่วางรูป */
+    height: 350px; /* ความสูงของพื้นที่วางรูป */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* สไตล์พื้นฐานของทุกรูปในสแต็ก */
+.stack-image {
+    position: absolute;
+    width: 150px; /* ขนาดรูปเริ่มต้น */
+    height: 220px;
+    border-radius: 12px;
+    background-color: #1a1a1a; /* สีพื้นหลังรูป (ระหว่างรอโหลด) */
+    border: 3px solid #333; /* ขอบบางๆ */
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5); /* เงาปกติ */
+    transition: all 0.5s ease; /* แอนิเมชั่นเวลาเปลี่ยน */
+    overflow: hidden; /* กันรูปโผล่ */
+    z-index: 1; /* ลำดับการซ้อน (ค่าพื้นฐาน) */
+}
+
+/* จัดการรูปด้านใน */
+.stack-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* กันรูปเบี้ยว */
+}
+
+/* --- จัดตำแหน่งแต่ละรูปตามภาพร่าง --- */
+
+/* 1. รูปตรงกลาง (เหลือง) - เด่นที่สุด */
+.stack-image.img-center {
+    width: 200px; /* ขนาดใหญ่สุด */
+    height: 300px;
+    border-color: #5f84ff; /* ขอบสีฟ้า */
+    box-shadow: 0 0 30px #feb47b; /* แสงฟุ้งฟ้า */
+    transform: translateZ(50px); /* ดันมาด้านหน้าสุด */
+    z-index: 10; /* ซ้อนทับคนอื่น */
+}
+
+/* 2. รูปซ้ายและขวา (แดง) - อยู่ข้างหลังตรงกลางนิดนึง และเอียงตัว */
+.stack-image.img-left {
+    transform: translateX(-120px) translateZ(0) rotateY(15deg); /* เอียงตัวไปทางซ้าย */
+    z-index: 5; /* อยู่หลังรูปกลาง */
+}
+
+.stack-image.img-right {
+    transform: translateX(120px) translateZ(0) rotateY(-15deg); /* เอียงตัวไปทางขวา */
+    z-index: 5; /* อยู่หลังรูปกลาง */
+}
+
+/* 3. รูปซ้ายสุดและขวาสุด (ม่วง) - อยู่หลังสุด ขนาดเล็กลง และเอียงตัว */
+.stack-image.img-left-far {
+    width: 130px; /* เล็กลง */
+    height: 190px;
+    transform: translateX(-220px) translateZ(-50px) rotateY(25deg); /* เอียงมากขึ้น */
+    z-index: 2; /* อยู่หลังสุด */
+    opacity: 0.8; /* จางลงนิดนึง */
+}
+
+/* ----------------รูปหลายรูป-------------------- */
+
+/* ----------------รูปหลายรูป-------------------- */
+
+.stack-image.img-right-far {
+    width: 130px; /* เล็กลง */
+    height: 190px;
+    transform: translateX(220px) translateZ(-50px) rotateY(-25deg); /* เอียงมากขึ้น */
+    z-index: 2; /* อยู่หลังสุด */
+    opacity: 0.8; /* จางลงนิดนึง */
+}
+
+/* คอนเทนเนอร์หลักของกล่องใหม่ */
+.content-row {
+    /* สำคัญ: เลขนี้ต้องเท่ากับที่บอสตั้งไว้ใน .main-container (ถ้าบอสใช้ 800px ก็ใส่ 800px) */
+    max-width: 800px; 
+    margin: 20px auto; /* auto จะช่วยดึงให้มันมาอยู่ตรงกลางเส้นแดง */
+    display: flex;     /* สั่งให้กล่องย่อยวางเรียงกันซ้าย-ขวา */
+    gap: 20px;         /* ระยะห่างระหว่างกล่องซ้ายและขวา */
+}
+
+/* ตกแต่งกล่องย่อยข้างใน */
+.sub-box {
+    flex: 1;           /* สั่งให้ทั้ง 2 กล่องแบ่งพื้นที่กันคนละชิ้นเท่าๆ กัน */
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 22px; /* ให้มนเท่ากับกล่องขาวข้างบน */
+    box-shadow: 0px 0px 9px 3px rgba(255, 255, 255, 0.3); /* แสงขาวจางๆ */
+    color: #333;
+    min-height: 200px; /* ความสูงเริ่มต้นของกล่อง */
+}
+
+/* ทำให้ดูดีในมือถือ (ถ้าจอแคบให้เรียงต่อกันเป็นแนวตั้ง) */
+@media (max-width: 600px) {
+    .content-row {
+        flex-direction: column;
+        padding: 0 20px;
+    }
+}
+
+/* --- 8. Footer --- */
+footer {
+    background-color: #292929;
+    color: #7b7b7b;
+    padding: 10px;
+    text-align: center;
+    border-top: 2px solid #434343;
+}
