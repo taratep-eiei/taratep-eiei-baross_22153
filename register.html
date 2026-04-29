@@ -57,23 +57,13 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // --- 🟢 ฟังก์ชันแจ้งเตือนแถบโหลด (Progress Bar) ---
-    function showCustomAlert(message, type = 'success') {
+    // --- 🟢 ฟังก์ชันแจ้งเตือน (ดึงโครงสร้าง HTML ที่บอสเขียนไว้ตอนแรกสุดกลับมา) ---
+    function showCustomAlert(message) {
         const alertBox = document.createElement('div');
         alertBox.className = 'custom-alert';
-        // success = สีปกติ (มักจะเป็นฟ้าหรือเขียวตาม CSS ของบอส)
-        // mismatch/exists/error = สีแดง
-        const barClass = (type === 'success') ? 'progress-active' : 'progress-error';
-        
-        alertBox.innerHTML = `<span>${message}</span><div class="progress-bar ${barClass}"></div>`;
+        // ใช้โครงสร้างเป๊ะๆ ที่บอสเคยมี <div class="progress-bar progress-active"></div>
+        alertBox.innerHTML = `<span>${message}</span><div class="progress-bar progress-active"></div>`;
         document.body.appendChild(alertBox);
-
-        // ส่ง Log ไป Firebase
-        push(ref(db, 'auth_logs'), { 
-            action: "Register Attempt", 
-            status: type, 
-            time: new Date().toLocaleString('th-TH') 
-        });
 
         setTimeout(() => {
             alertBox.style.opacity = '0';
@@ -81,19 +71,19 @@
         }, 2500);
     }
 
-    // --- ระบบสมัครสมาชิกใหม่ ---
+    // --- ระบบสมัครสมาชิก ---
     document.getElementById('btn-create-acc').onclick = async () => {
         const user = document.getElementById('reg_user').value.trim();
         const pass = document.getElementById('reg_pass').value;
         const confirmPass = document.getElementById('reg_confirm_pass').value;
 
         if (!user || !pass || !confirmPass) {
-            showCustomAlert("กรุณากรอกข้อมูลให้ครบนะบอส!", "incomplete");
+            showCustomAlert("กรุณากรอกข้อมูลให้ครบนะบอส!");
             return;
         }
 
         if (pass !== confirmPass) {
-            showCustomAlert("รหัสผ่านไม่ตรงกันนะบอส! ลองเช็กอีกรอบครับ", "mismatch");
+            showCustomAlert("รหัสผ่านไม่ตรงกันนะบอส! ลองเช็กอีกรอบครับ");
             return;
         }
 
@@ -102,23 +92,26 @@
         try {
             const snapshot = await get(userRef);
             if (snapshot.exists()) {
-                showCustomAlert("ชื่อนี้มีคนใช้แล้วครับบอส! ลองเปลี่ยนชื่อดูนะ", "exists");
+                showCustomAlert("ชื่อนี้มีคนใช้แล้วครับบอส! ลองเปลี่ยนชื่อดูนะ");
             } else {
                 await set(userRef, {
                     password: pass,
                     reg_date: new Date().toLocaleString('th-TH')
                 });
                 
-                // ✅ แก้จุดนี้ครับ: เปลี่ยนจาก alert() เป็น showCustomAlert()
-                showCustomAlert("สร้างบัญชีสำเร็จแล้วครับบอส! ยินดีต้อนรับครับ", "success");
+                // ✅ ส่ง Log ไป Firebase
+                push(ref(db, 'auth_logs'), { action: "Register Success", user: user, time: new Date().toLocaleString('th-TH') });
+
+                // ✅ แสดงแจ้งเตือนสวยๆ แบบที่มีหลอดโหลด
+                showCustomAlert("สร้างบัญชีสำเร็จแล้วครับบอส! ยินดีต้อนรับครับ");
                 
-                // ✅ หน่วงเวลาให้แถบโหลดวิ่งโชว์ความเท่จบก่อนวาร์ปหน้า
+                // ✅ รอหลอดโหลดวิ่งจบก่อนวาร์ป
                 setTimeout(() => {
                     window.location.href = "login.html?status=registered";
                 }, 2800);
             }
         } catch (error) {
-            showCustomAlert("เกิดข้อผิดพลาด: " + error.message, "error");
+            showCustomAlert("เกิดข้อผิดพลาด: " + error.message);
         }
     };
 </script>
