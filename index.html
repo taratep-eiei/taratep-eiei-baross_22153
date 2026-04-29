@@ -64,6 +64,7 @@
         <div class="sidebar-content">
             <div class="profile-section">
                 <label for="upload-photo" class="upload-label">
+                    <!-- รูปเริ่มต้นถ้าไม่มีรูปในเครื่อง -->
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Baross" alt="Profile" class="side-img" id="main-profile-img">
                     <div class="upload-text">คลิกเพื่อเปลี่ยนรูป</div>
                 </label>
@@ -161,11 +162,14 @@
         const sidebar = document.getElementById("mySidebar");
         const uploadInput = document.getElementById('upload-photo');
 
-        // แสดงข้อมูลที่มีอยู่
-        updateProfileUI(savedName, savedImg);
+        // 🔥 แสดงรูปทันทีถ้ามีเซฟไว้ในเครื่อง (ไม่ต้องรอ Login)
+        if (savedImg) {
+            updateProfileUI(null, savedImg);
+        }
 
         // เช็คสถานะ Login
         if (savedName) {
+            updateProfileUI(savedName, null);
             loginBtn.href = "javascript:void(0)";
             loginBtn.onclick = (e) => {
                 e.preventDefault();
@@ -179,7 +183,6 @@
             uploadInput.onchange = (e) => {
                 const file = e.target.files[0];
                 if (file) {
-                    // ดักขนาดไฟล์ไม่ให้เกิน 2MB เพื่อความเสถียรของ LocalStorage
                     if (file.size > 2 * 1024 * 1024) {
                         alert("รูปใหญ่เกินไปครับบอส! เลือกรูปไม่เกิน 2MB นะครับ");
                         return;
@@ -189,7 +192,7 @@
                     reader.onload = (event) => {
                         const imageData = event.target.result;
                         updateProfileUI(null, imageData);
-                        localStorage.setItem('userProfilePic', imageData); // เซฟรูป
+                        localStorage.setItem('userProfilePic', imageData);
 
                         push(ref(db, 'activity_logs/profile'), { 
                             action: "Change Profile Picture", 
@@ -214,11 +217,10 @@
 
     initApp();
 
-    // --- 4. ปุ่ม Logout (แก้ใหม่: ไม่ลบรูปแล้ว) ---
+    // --- 4. ปุ่ม Logout (เก็บรูปไว้ ไม่ลบแล้ว) ---
     document.getElementById('logout-btn').onclick = () => {
-        localStorage.removeItem('savedUsername'); // ลบแค่ชื่อเพื่อ Logout
-        // ไม่สั่งลบ userProfilePic เพื่อให้ Login กลับมาแล้วรูปยังอยู่
-        location.reload();
+        localStorage.removeItem('savedUsername'); // ลบแค่ชื่อ
+        location.reload(); // รีเฟรชหน้า
     };
 </script>
 </body>
