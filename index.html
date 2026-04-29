@@ -125,7 +125,6 @@
         if (center && currentClass) {
             center.classList.replace('img-center', currentClass);
             el.classList.replace(currentClass, 'img-center');
-            // ส่ง Log ไป Firebase
             push(ref(db, 'activity_logs/carousel'), { 
                 action: `สลับรูปไปที่ ${currentClass}`, 
                 time: new Date().toLocaleString() 
@@ -133,59 +132,70 @@
         }
     };
 
-    // --- 2. ระบบ Login & Sidebar ---
-    document.addEventListener('DOMContentLoaded', () => {
-        const savedName = localStorage.getItem('savedUsername');
-        const loginBtn = document.getElementById('login-btn');
+    // --- 🛠️ ส่วนที่พี่แก้ให้ใหม่ (ฟังก์ชันจัดการโปรไฟล์) ---
+    const updateProfileUI = (name, photoData) => {
         const navUser = document.getElementById('nav-username');
         const sideUser = document.getElementById('side-username');
-        const sidebar = document.getElementById("mySidebar");
         const navProfileImg = document.getElementById('nav-profile-img');
         const mainProfileImg = document.getElementById('main-profile-img');
 
-        // เช็คว่า Login หรือยัง
-        if (savedName) {
-            navUser.innerText = savedName;
-            sideUser.innerText = savedName;
-            loginBtn.href = "javascript:void(0)";
-            
-            // คลิกที่ชื่อ/รูปใน Navbar เพื่อเปิด Sidebar
-            loginBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                sidebar.style.width = "320px";
-            });
-            document.getElementById('logout-btn').style.display = "inline-block";
-
-            // ดึงรูปโปรไฟล์ที่เคยเซฟไว้ (ถ้ามี)
-            const savedImg = localStorage.getItem('userProfilePic');
-            if (savedImg) {
-                mainProfileImg.src = savedImg;
-                navProfileImg.src = savedImg;
-                navProfileImg.style.display = "inline-block";
-            }
-        } else {
-            loginBtn.href = "login.html";
+        if (name) {
+            if (navUser) navUser.innerText = name;
+            if (sideUser) sideUser.innerText = name;
         }
 
-        // --- 3. ระบบอัปโหลด/เปลี่ยนรูปโปรไฟล์ ---
+        if (photoData) {
+            if (mainProfileImg) mainProfileImg.src = photoData;
+            if (navProfileImg) {
+                navProfileImg.src = photoData;
+                navProfileImg.style.display = "inline-block";
+            }
+        }
+    };
+
+    // ทำงานทันทีที่โหลดเสร็จ
+    const initApp = () => {
+        const savedName = localStorage.getItem('savedUsername');
+        const savedImg = localStorage.getItem('userProfilePic');
+        const loginBtn = document.getElementById('login-btn');
+        const sidebar = document.getElementById("mySidebar");
         const uploadInput = document.getElementById('upload-photo');
+
+        // 1. โหลดข้อมูลเก่ามาแสดง
+        updateProfileUI(savedName, savedImg);
+
+        // 2. ตั้งค่าปุ่ม Login/Sidebar
+        if (savedName) {
+            loginBtn.href = "javascript:void(0)";
+            loginBtn.onclick = (e) => {
+                e.preventDefault();
+                sidebar.style.width = "320px";
+            };
+            document.getElementById('logout-btn').style.display = "inline-block";
+        }
+
+        // 3. 🟢 ระบบอัปโหลดรูป (แก้จุดบอด)
         if (uploadInput) {
-            uploadInput.addEventListener('change', function(e) {
+            uploadInput.onchange = (e) => {
                 const file = e.target.files[0];
                 if (file) {
+                    // เช็คขนาดไฟล์ (ไม่ควรเกิน 2MB เพราะจะเซฟลง localStorage ไม่ได้)
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert("รูปใหญ่เกินไปครับบอส! ลองหารูปที่ขนาดเล็กกว่า 2MB นะ");
+                        return;
+                    }
+
                     const reader = new FileReader();
-                    reader.onload = function(event) {
+                    reader.onload = (event) => {
                         const imageData = event.target.result;
                         
-                        // แสดงรูปทันที
-                        mainProfileImg.src = imageData;
-                        navProfileImg.src = imageData;
-                        navProfileImg.style.display = "inline-block";
+                        // อัปเดตรูปบนหน้าจอทันที
+                        updateProfileUI(null, imageData);
 
-                        // บันทึกไว้ในเครื่อง
+                        // บันทึกลงเครื่อง
                         localStorage.setItem('userProfilePic', imageData);
 
-                        // ส่ง Log
+                        // ส่ง Log ไป Firebase
                         push(ref(db, 'activity_logs/profile'), { 
                             action: "Change Profile Picture", 
                             user: savedName || "Guest",
@@ -194,21 +204,26 @@
                     };
                     reader.readAsDataURL(file);
                 }
-            });
+            };
         }
 
-        // ปิด Sidebar เมื่อคลิกข้างนอก
-        window.addEventListener('click', (e) => {
-            if (sidebar.style.width === "320px" && !sidebar.contains(e.target) && !loginBtn.contains(e.target)) {
-                sidebar.style.width = "0";
+        // 4. ปิด Sidebar เมื่อคลิกข้างนอก
+        window.onclick = (e) => {
+            if (sidebar && sidebar.style.width === "320px") {
+                if (!sidebar.contains(e.target) && !loginBtn.contains(e.target)) {
+                    sidebar.style.width = "0";
+                }
             }
-        });
-    });
+        };
+    };
+
+    // เริ่มทำงาน
+    initApp();
 
     // ปุ่ม Logout
     document.getElementById('logout-btn').onclick = () => {
         localStorage.removeItem('savedUsername');
-        localStorage.removeItem('userProfilePic'); // ลบรูปออกตอน Logout (หรือจะไม่ลบก็ได้ครับบอส)
+        localStorage.removeItem('userProfilePic');
         location.reload();
     };
 </script>
