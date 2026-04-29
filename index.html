@@ -19,34 +19,10 @@
         <div style="flex:1;"></div>
 
         <div style="flex:1; display:flex; justify-content:center;">
-            <div class="Home">
-                <a href="index.html">Home</a> <span class="step-line">|</span>
-                <ul class="supmenu">
-                    <li><a href="#">เมนูย่อย 1</a></li>
-                    <li><a href="#">เมนูย่อย 2</a></li>
-                </ul>
-            </div>
-            <div class="About">
-                <a href="#">About</a> <span class="step-line">|</span>
-                <ul class="supmenu">
-                    <li><a href="#">เมนูย่อย 1</a></li>
-                    <li><a href="#">เมนูย่อย 2</a></li>
-                </ul>
-            </div>
-            <div class="Services">
-                <a href="#">Services</a> <span class="step-line">|</span>
-                <ul class="supmenu">
-                    <li><a href="#">เมนูย่อย 1</a></li>
-                    <li><a href="#">เมนูย่อย 2</a></li>
-                </ul>
-            </div>
-            <div class="Contact">
-                <a href="#">Contact</a>
-                <ul class="supmenu">
-                    <li><a href="#">เมนูย่อย 1</a></li>
-                    <li><a href="#">เมนูย่อย 2</a></li>
-                </ul>
-            </div>
+            <div class="Home"><a href="index.html">Home</a> <span class="step-line">|</span></div>
+            <div class="About"><a href="#">About</a> <span class="step-line">|</span></div>
+            <div class="Services"><a href="#">Services</a> <span class="step-line">|</span></div>
+            <div class="Contact"><a href="#">Contact</a></div>
         </div>
 
         <div style="flex:1; display:flex; justify-content:flex-end; align-items: center; padding-right: 20px;">
@@ -115,24 +91,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // --- 1. ระบบสลับรูป (Carousel) ---
-    window.switchPhoto = function(el) {
-        if (el.classList.contains('img-center')) return;
-        const container = document.getElementById('photoStack');
-        const center = container.querySelector('.img-center');
-        const classes = ['img-left-far', 'img-left', 'img-center', 'img-right', 'img-right-far'];
-        const currentClass = classes.find(c => el.classList.contains(c));
-        if (center && currentClass) {
-            center.classList.replace('img-center', currentClass);
-            el.classList.replace(currentClass, 'img-center');
-            push(ref(db, 'activity_logs/carousel'), { 
-                action: `สลับรูปไปที่ ${currentClass}`, 
-                time: new Date().toLocaleString() 
-            });
-        }
-    };
-
-    // --- 2. ฟังก์ชันอัปเดต UI โปรไฟล์ ---
     const updateProfileUI = (name, photoData) => {
         const navUser = document.getElementById('nav-username');
         const sideUser = document.getElementById('side-username');
@@ -151,13 +109,11 @@
                 navProfileImg.style.display = "inline-block";
             }
         } else {
-            // คืนค่า Default เมื่อยังไม่มีการอัปโหลดของ User คนนั้น
             if (mainProfileImg) mainProfileImg.src = "https://api.dicebear.com/7.x/avataaars/svg?seed=Baross";
             if (navProfileImg) navProfileImg.style.display = "none";
         }
     };
 
-    // --- 3. เริ่มต้นระบบทั้งหมด ---
     const initApp = () => {
         const savedName = localStorage.getItem('savedUsername');
         const loginBtn = document.getElementById('login-btn');
@@ -165,7 +121,7 @@
         const uploadInput = document.getElementById('upload-photo');
 
         if (savedName) {
-            // 🔥 ดึงรูปเฉพาะของ User นั้นๆ (ใช้ชื่อ User เป็น Key)
+            // 🔥 ดึงรูปเฉพาะของ User นั้นๆ
             const userSpecificImg = localStorage.getItem('userProfilePic_' + savedName);
             updateProfileUI(savedName, userSpecificImg);
 
@@ -179,49 +135,29 @@
             updateProfileUI("เข้าสู่ระบบ", null);
         }
 
-        // ระบบอัปโหลดรูปแยกรายคน
         if (uploadInput) {
             uploadInput.onchange = (e) => {
                 const file = e.target.files[0];
                 if (file && savedName) {
-                    if (file.size > 2 * 1024 * 1024) {
-                        alert("รูปใหญ่เกินไปครับบอส! ไม่เกิน 2MB นะ");
-                        return;
-                    }
                     const reader = new FileReader();
                     reader.onload = (event) => {
                         const imageData = event.target.result;
                         updateProfileUI(null, imageData);
-                        // 🔥 เซฟรูปโดยผูกกับชื่อ User
+                        // 🔥 เซฟรูปแยกตามชื่อ User
                         localStorage.setItem('userProfilePic_' + savedName, imageData);
-
-                        push(ref(db, 'activity_logs/profile'), { 
-                            action: "Change Profile Picture", 
-                            user: savedName,
-                            time: new Date().toLocaleString() 
-                        });
                     };
                     reader.readAsDataURL(file);
                 }
             };
         }
-
-        // ปิด Sidebar
-        window.onclick = (e) => {
-            if (sidebar && sidebar.style.width === "320px") {
-                if (!sidebar.contains(e.target) && !loginBtn.contains(e.target)) {
-                    sidebar.style.width = "0";
-                }
-            }
-        };
     };
 
     initApp();
 
-    // --- 4. ปุ่ม Logout (ลบแค่ชื่อสถานะ แต่รูปในเครื่องของ User นั้นๆ ยังอยู่) ---
+    // 🔥 จุดแก้: ล้างแค่ชื่อออก แต่ห้ามล้าง localStorage ทั้งหมด หรือลบรูปทิ้ง
     document.getElementById('logout-btn').onclick = () => {
-        localStorage.removeItem('savedUsername');
-        location.reload();
+        localStorage.removeItem('savedUsername'); // ลบแค่ว่าใครกำลังใช้อยู่
+        location.reload(); // รีโหลดเพื่อกลับไปสถานะ "ไม่ได้ล็อกอิน"
     };
 </script>
 </body>
