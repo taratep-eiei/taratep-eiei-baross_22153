@@ -6,10 +6,7 @@
     <title>My Webpage</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link rel="stylesheet" href="style.css">
-
     <meta name="google" content="notranslate">
-    
-    <meta charset="UTF-8">
     <meta http-equiv="Content-Language" content="th">
 </head>
 <body>
@@ -52,44 +49,43 @@
             </div>
         </div>
 
-        <div style="flex:1; display:flex; justify-content:flex-end; align-items: center;">
-           <a href="javascript:void(0)" class="nav-link" id="login-btn" onclick="openNav()">
-        <img src="" id="nav-profile-img" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; margin-right: 8px; display: none;">
-        <span id="nav-username">เข้าสู่ระบบ</span>
-    </a>
+        <div style="flex:1; display:flex; justify-content:flex-end; align-items: center; padding-right: 20px;">
+            <!-- ✅ ตั้งค่าปุ่มให้รองรับทั้งหน้า Login และการเปิด Sidebar -->
+            <a href="login.html" class="nav-link" id="login-btn">
+                <img src="" id="nav-profile-img" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; margin-right: 8px; display: none;">
+                <span id="nav-username">เข้าสู่ระบบ</span>
+            </a>
                 
-                <a href="/" id="logout-btn" style="display: none; margin-left: 15px; text-decoration: none;">
-                    <span class="material-symbols-outlined" style="vertical-align: middle; color: #ff4b4b;">logout</span>
-                </a>
-            </div>
+            <a href="/" id="logout-btn" style="display: none; margin-left: 15px; text-decoration: none;">
+                <span class="material-symbols-outlined" style="vertical-align: middle; color: #ff4b4b;">logout</span>
+            </a>
         </div>
     </nav>
 
+    <!-- Sidebar ส่วนจัดการ User -->
     <div id="mySidebar" class="sidebar">
-    <a href="login.html" class="nav-link" id="login-btn"></a>
-    
-    <div class="sidebar-content">
-        <div class="profile-section">
-            <label for="upload-photo" class="upload-label">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Baross" alt="Profile" class="side-img" id="main-profile-img">
-                <div class="upload-text">คลิกเพื่อเปลี่ยนรูป</div>
-            </label>
-            <input type="file" id="upload-photo" style="display:none" accept="image/*">
-            
-            <h2 id="side-username">Guest</h2>
-            <p id="side-status" class="status-text">Online</p>
-        </div>
+        <div class="sidebar-content">
+            <div class="profile-section">
+                <label for="upload-photo" class="upload-label">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Baross" alt="Profile" class="side-img" id="main-profile-img">
+                    <div class="upload-text">คลิกเพื่อเปลี่ยนรูป</div>
+                </label>
+                <input type="file" id="upload-photo" style="display:none" accept="image/*">
+                
+                <h2 id="side-username">Guest</h2>
+                <p id="side-status" class="status-text">Online</p>
+            </div>
 
-        <hr class="sidebar-divider">
+            <hr class="sidebar-divider">
 
-        <div class="sidebar-info-card">
-            <p class="info-card-title">User Dashboard</p>
-            <p class="info-card-detail">
-                ยินดีต้อนรับสู่ระบบจัดการส่วนตัว และการตั้งค่าต่าง ๆ จะถูกรวบรวมไว้ที่นี่ในอนาคตครับ
-            </p>
+            <div class="sidebar-info-card">
+                <p class="info-card-title">User Dashboard</p>
+                <p class="info-card-detail">
+                    ยินดีต้อนรับสู่ระบบจัดการส่วนตัว และการตั้งค่าต่าง ๆ จะถูกรวบรวมไว้ที่นี่ในอนาคตครับ
+                </p>
+            </div>
         </div>
     </div>
-</div>
 
     <main>
         <section class="main-container">
@@ -110,25 +106,24 @@
         </div>
 
         <div class="photo-spread-section">
-    <div class="photo-container" id="photoStack">
-        <div class="stack-image img-left-far" onclick="switchPhoto(this)">
-            <img src="img1.jpg">
+            <div class="photo-container" id="photoStack">
+                <div class="stack-image img-left-far" onclick="switchPhoto(this)">
+                    <img src="img1.jpg">
+                </div>
+                <div class="stack-image img-left" onclick="switchPhoto(this)">
+                    <img src="img2.jpg">
+                </div>
+                <div class="stack-image img-center" onclick="switchPhoto(this)">
+                    <img src="img3.jpg">
+                </div>
+                <div class="stack-image img-right" onclick="switchPhoto(this)">
+                    <img src="img4.jpg">
+                </div>
+                <div class="stack-image img-right-far" onclick="switchPhoto(this)">
+                    <img src="img5.jpg">
+                </div>
+            </div>
         </div>
-        <div class="stack-image img-left" onclick="switchPhoto(this)">
-            <img src="img2.jpg">
-        </div>
-        <div class="stack-image img-center" onclick="switchPhoto(this)">
-            <img src="img3.jpg">
-        </div>
-        <div class="stack-image img-right" onclick="switchPhoto(this)">
-            <img src="img4.jpg">
-        </div>
-        <div class="stack-image img-right-far" onclick="switchPhoto(this)">
-            <img src="img5.jpg">
-        </div>
-    </div>
-</div>
-
     </main>
 
     <footer>
@@ -136,10 +131,10 @@
     </footer>
 
 <script type="module">
-    // --- 1. ระบบ Firebase (ดึงมาจากโปรเจกต์บอส) ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
     import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
 
+    // Firebase Config ของบอส
     const firebaseConfig = {
         apiKey: "AIzaSyBF5t68YK-QDAC026L6c_OFYeCP-y3RHoA",
         authDomain: "wep-project-by-baross.firebaseapp.com",
@@ -153,31 +148,21 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // --- 2. ฟังก์ชันสลับตำแหน่ง (Swap Position) ---
+    // --- 1. ระบบสลับรูปภาพ (Carousel Logic) ---
     window.switchPhoto = function(clickedElement) {
-        // ถ้ากดตัวที่อยู่ตรงกลางอยู่แล้ว ไม่ต้องทำอะไร
         if (clickedElement.classList.contains('img-center')) return;
 
         const container = document.getElementById('photoStack');
         const currentCenter = container.querySelector('.img-center');
-        
-        // รายชื่อคลาสตำแหน่งทั้งหมด
         const posClasses = ['img-left-far', 'img-left', 'img-center', 'img-right', 'img-right-far'];
-
-        // หาคลาสปัจจุบันของตัวที่บอสกด
         const clickedClass = posClasses.find(c => clickedElement.classList.contains(c));
 
         if (currentCenter && clickedClass) {
-            // สลับคลาสกันแบบดื้อๆ เลยครับ
-            // 1. เอาตัวกลางเดิม ไปอยู่ที่ตำแหน่งของตัวที่กด
             currentCenter.classList.remove('img-center');
             currentCenter.classList.add(clickedClass);
-
-            // 2. เอาตัวที่กด มาอยู่ที่ตำแหน่งตรงกลาง
             clickedElement.classList.remove(clickedClass);
             clickedElement.classList.add('img-center');
 
-            // ส่ง Log ไปบอก Firebase ว่าบอสสลับรูปแล้ว
             push(ref(db, 'activity_logs/carousel'), {
                 action: `สลับ ${clickedClass} มาเป็นตัวกลาง`,
                 timestamp: new Date().toLocaleString('th-TH')
@@ -185,23 +170,49 @@
         }
     };
 
-    // --- 3. ระบบ Sidebar & Login (ตัวเดิมของบอส) ---
+    // --- 2. ระบบ Sidebar & Login Control (แก้ไขบั๊กปุ่มกดไม่ได้) ---
     window.onload = function() {
         const savedName = localStorage.getItem('savedUsername');
+        const loginBtn = document.getElementById('login-btn');
+        const navUser = document.getElementById('nav-username');
+        const sideUser = document.getElementById('side-username');
+
         if (savedName) {
-            const navUser = document.getElementById('nav-username');
+            // ✅ กรณีล็อกอินแล้ว
             if (navUser) navUser.innerText = savedName;
+            if (sideUser) sideUser.innerText = savedName;
             
-            const loginBtn = document.getElementById('login-btn');
             if (loginBtn) {
-                loginBtn.href = "javascript:void(0)";
-                loginBtn.onclick = () => { 
-                    const sb = document.getElementById("mySidebar");
-                    if(sb) sb.style.width = "320px";
+                loginBtn.href = "javascript:void(0)"; 
+                loginBtn.onclick = function(e) { 
+                    e.preventDefault();
+                    document.getElementById("mySidebar").style.width = "320px";
                 };
+            }
+            // แสดงปุ่ม Logout
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) logoutBtn.style.display = "inline-block";
+        } else {
+            // ✅ กรณีเป็น Guest (ยังไม่ได้ล็อกอิน)
+            if (loginBtn) {
+                loginBtn.href = "login.html"; // ให้กดแล้วไปหน้าล็อกอิน
+                loginBtn.onclick = null; 
             }
         }
     };
+
+    // --- 3. ระบบปิด Sidebar เมื่อคลิกพื้นที่ภายนอก (แก้ไขตามภาพ image_7dd992.jpg) ---
+    window.addEventListener('click', function(e) {
+        const sidebar = document.getElementById("mySidebar");
+        const loginBtn = document.getElementById('login-btn');
+        
+        // ตรวจสอบว่า Sidebar เปิดอยู่ และจุดที่คลิกไม่ใช่ตัว Sidebar เอง หรือไม่ใช่ปุ่มเปิด
+        if (sidebar && sidebar.style.width === "320px") {
+            if (!sidebar.contains(e.target) && !loginBtn.contains(e.target)) {
+                sidebar.style.width = "0";
+            }
+        }
+    });
 </script>
 
 </body>
