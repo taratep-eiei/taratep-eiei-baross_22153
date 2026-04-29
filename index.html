@@ -135,7 +135,8 @@
         <p>&copy; 2026 baross. All rights reserved.</p>
     </footer>
 
-<script type="module">
+ <script type="module">
+    // --- 1. ตั้งค่า Firebase (ข้อมูลจากรูป image_8b7d51.png และ image_8b978f.png) ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
     import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
 
@@ -152,7 +153,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // --- ฟังก์ชันส่ง Log ไป Firebase ---
+    // ฟังก์ชันส่ง Log (จะทำงานเฉพาะตอนที่บอสสั่งเท่านั้น)
     function sendLog(path, data) {
         const logRef = ref(db, path);
         push(logRef, {
@@ -162,69 +163,84 @@
         });
     }
 
-    // ดักจับ Error 405
-    window.addEventListener('error', (e) => {
-        sendLog('error_logs/405', { details: e.message, user: localStorage.getItem('savedUsername') || 'Guest' });
-    }, true);
+    // --- 2. ฟังก์ชันเปิด/ปิด Sidebar (แบบล็อกกุญแจ) ---
+    window.openNav = function() {
+        const savedName = localStorage.getItem('savedUsername');
+        
+        // ถ้าไม่มีชื่อ (ยังไม่ Login) ให้เด้งไปหน้า Login ทันที ไม่ยอมให้เปิดเมนู Guest แบบในรูป image_8aaebb.jpg
+        if (!savedName) {
+            window.location.href = "login.html";
+            return;
+        }
 
-    // --- ระบบ Sidebar & UI เดิมของบอส ---
-    window.openNav = () => { document.getElementById("mySidebar").style.width = "320px"; };
-    window.closeNav = () => { document.getElementById("mySidebar").style.width = "0"; };
-
-    window.addEventListener('click', (e) => {
         const sidebar = document.getElementById("mySidebar");
-        const loginBtn = document.getElementById('login-btn');
-        if (sidebar?.style.width === "320px" && !sidebar.contains(e.target) && !loginBtn.contains(e.target)) closeNav();
-    });
+        if (sidebar) sidebar.style.width = "320px";
+    };
 
-    window.onload = () => {
+    window.closeNav = function() {
+        const sidebar = document.getElementById("mySidebar");
+        if (sidebar) sidebar.style.width = "0";
+    };
+
+    // --- 3. ระบบจัดการหน้าเว็บเมื่อโหลด (Init) ---
+    window.onload = function() {
         const savedName = localStorage.getItem('savedUsername');
         const savedPic = localStorage.getItem('userProfilePic');
         
-        // ถ้ามีการ Login เข้ามา ให้เก็บ Log ทันที
+        // ตรวจสอบสถานะการ Login
         if (savedName) {
-            sendLog('activity_logs/visits', { username: savedName, action: "เข้าสู่หน้าหลัก" });
-            
+            // กรณี: Login แล้ว (ให้แสดงชื่อบอสและเตรียมระบบ Sidebar)
             const loginBtn = document.getElementById('login-btn');
             if (loginBtn) {
                 loginBtn.href = "javascript:void(0)";
                 loginBtn.onclick = openNav;
                 loginBtn.style.color = "#00c6ff";
             }
-            document.getElementById('nav-username').innerText = savedName;
-            document.getElementById('side-username').innerText = savedName;
             
+            const navUser = document.getElementById('nav-username');
+            const sideUser = document.getElementById('side-username');
+            if (navUser) navUser.innerText = savedName;
+            if (sideUser) sideUser.innerText = savedName;
+
+            // บันทึก Log เฉพาะตอนที่ Login อยู่จริงๆ
+            sendLog('activity_logs/visits', { username: savedName, action: "เข้าสู่หน้าหลัก" });
+
             const logoutBtn = document.getElementById('logout-btn');
             if (logoutBtn) {
                 logoutBtn.style.display = "inline-block";
-                logoutBtn.onclick = () => {
+                logoutBtn.onclick = function() {
                     localStorage.removeItem('savedUsername');
-                    window.location.href = "index.html";
+                    window.location.href = "index.html"; // รีเซ็ตหน้าเว็บ
                 };
             }
+        } else {
+            // กรณี: ยังไม่ได้ Login (ให้ปุ่มเป็น Link ไปหน้า Login ปกติ)
+            const loginBtn = document.getElementById('login-btn');
+            if (loginBtn) {
+                loginBtn.href = "login.html";
+                loginBtn.onclick = null; // ปิดฟังก์ชันเปิด Sidebar
+            }
+            console.log("ยังไม่ Login: เมนูถูกล็อกไว้ครับบอส");
         }
-        
+
         if (savedPic) {
-            document.getElementById('main-profile-img').src = savedPic;
+            const mainImg = document.getElementById('main-profile-img');
             const navImg = document.getElementById('nav-profile-img');
+            if (mainImg) mainImg.src = savedPic;
             if (navImg) { navImg.src = savedPic; navImg.style.display = "inline-block"; }
         }
     };
 
-    // ระบบเปลี่ยนรูป
-    document.getElementById('upload-photo')?.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const data = event.target.result;
-                localStorage.setItem('userProfilePic', data);
-                document.getElementById('main-profile-img').src = data;
-                document.getElementById('nav-profile-img').src = data;
-            };
-            reader.readAsDataURL(file);
+    // --- 4. ดักจับ Error (เฉพาะตอนที่มีการใช้งานจริง) ---
+    window.addEventListener('error', (e) => {
+        const savedName = localStorage.getItem('savedUsername');
+        if (savedName) { // ส่ง Log เฉพาะตอน Login แล้วเท่านั้น
+            sendLog('error_logs/system', { 
+                details: e.message, 
+                user: savedName 
+            });
         }
-    });
+    }, true);
 </script>
 
 </body>
