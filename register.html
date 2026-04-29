@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>สมัครสมาชิก</title>
     <link rel="stylesheet" href="style-login.css">
-    <link rel="stylesheet" href="alert-style.css"> <!-- ✅ ตรวจสอบไฟล์ CSS นี้ด้วยนะครับ -->
+    <link rel="stylesheet" href="alert-style.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=undo" />
 </head>
 <body>
@@ -61,8 +61,9 @@
     function showCustomAlert(message, type = 'success') {
         const alertBox = document.createElement('div');
         alertBox.className = 'custom-alert';
-        //success = สีฟ้า/เขียว, error/mismatch = สีแดง
-        const barClass = type === 'success' ? 'progress-active' : 'progress-error';
+        // success = สีปกติ (มักจะเป็นฟ้าหรือเขียวตาม CSS ของบอส)
+        // mismatch/exists/error = สีแดง
+        const barClass = (type === 'success') ? 'progress-active' : 'progress-error';
         
         alertBox.innerHTML = `<span>${message}</span><div class="progress-bar ${barClass}"></div>`;
         document.body.appendChild(alertBox);
@@ -86,13 +87,11 @@
         const pass = document.getElementById('reg_pass').value;
         const confirmPass = document.getElementById('reg_confirm_pass').value;
 
-        // 1. เช็คว่ากรอกครบไหม
         if (!user || !pass || !confirmPass) {
             showCustomAlert("กรุณากรอกข้อมูลให้ครบนะบอส!", "incomplete");
             return;
         }
 
-        // 2. เช็ครหัสผ่านตรงกันไหม
         if (pass !== confirmPass) {
             showCustomAlert("รหัสผ่านไม่ตรงกันนะบอส! ลองเช็กอีกรอบครับ", "mismatch");
             return;
@@ -101,21 +100,19 @@
         const userRef = ref(db, 'users/' + user);
 
         try {
-            // 3. เช็คว่าชื่อนี้มีในระบบหรือยัง
             const snapshot = await get(userRef);
             if (snapshot.exists()) {
                 showCustomAlert("ชื่อนี้มีคนใช้แล้วครับบอส! ลองเปลี่ยนชื่อดูนะ", "exists");
             } else {
-                // 4. บันทึกลง Database
                 await set(userRef, {
                     password: pass,
                     reg_date: new Date().toLocaleString('th-TH')
                 });
                 
-                // ✅ ใช้ Custom Alert แทน alert() มาตรฐาน
-                showCustomAlert("สร้างบัญชีสำเร็จแล้วครับบอส! กำลังพาไปหน้าล็อกอิน...", "success");
+                // ✅ แก้จุดนี้ครับ: เปลี่ยนจาก alert() เป็น showCustomAlert()
+                showCustomAlert("สร้างบัญชีสำเร็จแล้วครับบอส! ยินดีต้อนรับครับ", "success");
                 
-                // ✅ หน่วงเวลาให้แถบโหลดวิ่งจนจบก่อนวาร์ป
+                // ✅ หน่วงเวลาให้แถบโหลดวิ่งโชว์ความเท่จบก่อนวาร์ปหน้า
                 setTimeout(() => {
                     window.location.href = "login.html?status=registered";
                 }, 2800);
