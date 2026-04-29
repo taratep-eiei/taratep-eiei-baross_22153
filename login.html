@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เข้าสู่ระบบ</title>
     <link rel="stylesheet" href="style-login.css">
+    <link rel="stylesheet" href="alert-style.css"> <!-- ✅ เช็คไฟล์นี้ด้วยนะครับบอส -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=undo" />
 </head>
 <body>
@@ -18,7 +19,6 @@
         </div>
         <div class="pum"><h2>เข้าสู่ระบบ</h2></div>
         
-        <!-- ✅ เอา id="login-form" ออกมาคุมแบบคลีนๆ -->
         <div id="login-form">
             <div class="input-group">
                 <label>ชื่อผู้ใช้งาน</label>
@@ -33,7 +33,6 @@
         <p class="register-link">ยังไม่มีบัญชี? <a href="register.html">สมัครสมาชิก</a></p>
     </div>
 </main>
-<link rel="stylesheet" href="alert-style.css">
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
@@ -52,26 +51,30 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // --- ส่วนแจ้งเตือนสมัครสมาชิกสำเร็จ ---
-    const urlParams = new URLSearchParams(window.location.search);
-    const status = urlParams.get('status');
-
-    if (status === 'registered') {
+    // --- 🟢 ฟังก์ชันแจ้งเตือนแถบโหลด (Progress Bar) ---
+    function showCustomAlert(message, type = 'success') {
         const alertBox = document.createElement('div');
         alertBox.className = 'custom-alert';
-        alertBox.innerHTML = `<span>สมัครสมาชิกสำเร็จ! เข้าสู่ระบบได้เลย</span><div class="progress-bar progress-active"></div>`;
+        // ใช้ class ตามประเภท success หรือ mismatch/error
+        const barClass = type === 'success' ? 'progress-active' : 'progress-error';
+        
+        alertBox.innerHTML = `<span>${message}</span><div class="progress-bar ${barClass}"></div>`;
         document.body.appendChild(alertBox);
-
-        push(ref(db, 'auth_logs'), { action: "Register Success Notification", time: new Date().toLocaleString('th-TH') });
 
         setTimeout(() => {
             alertBox.style.opacity = '0';
             setTimeout(() => alertBox.remove(), 500);
         }, 2000);
+    }
+
+    // --- ส่วนแจ้งเตือนมาจากหน้าสมัครสมาชิก ---
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('status') === 'registered') {
+        showCustomAlert("สมัครสมาชิกสำเร็จ! เข้าสู่ระบบได้เลย", "success");
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    // --- ส่วนควบคุมการ Login (ปรับปรุงใหม่เพื่อเช็ครหัสผ่าน) ---
+    // --- ส่วนควบคุมการ Login ---
     const loginBtn = document.getElementById('login-btn-main');
 
     if (loginBtn) {
@@ -80,41 +83,41 @@
             const password = document.getElementById('password-input').value;
 
             if (username === "" || password === "") {
-                alert("กรุณากรอกข้อมูลให้ครบครับบอส!");
+                showCustomAlert("กรุณากรอกข้อมูลให้ครบครับบอส!", "error");
                 return;
             }
 
             try {
-                // 🔍 ไปดึงข้อมูล user จากฐานข้อมูล
                 const dbRef = ref(db);
                 const snapshot = await get(child(dbRef, `users/${username}`));
 
                 if (snapshot.exists()) {
                     const userData = snapshot.val();
                     
-                    // 🔑 เช็ครหัสผ่าน
                     if (userData.password === password) {
-                        // 1. บันทึกชื่อลงเครื่อง
                         localStorage.setItem('savedUsername', username);
                         
-                        // 2. ส่ง Log ไป Firebase
                         push(ref(db, 'auth_logs'), { 
                             action: "Login Success", 
                             user: username, 
                             time: new Date().toLocaleString('th-TH') 
                         });
 
-                        alert("ยินดีต้อนรับครับบอส!");
-                        window.location.href = "index.html";
+                        showCustomAlert("ยินดีต้อนรับครับบอส! กำลังเข้าสู่ระบบ...", "success");
+                        
+                        // ✅ รอให้แถบโหลดวิ่งแป๊บนึงค่อยวาร์ปหน้า
+                        setTimeout(() => {
+                            window.location.href = "index.html";
+                        }, 2200);
+                        
                     } else {
-                        alert("รหัสผ่านไม่ถูกต้องนะบอส เช็กอีกทีครับ!");
+                        showCustomAlert("รหัสผ่านไม่ถูกต้องนะบอส เช็กอีกทีครับ!", "error");
                     }
                 } else {
-                    alert("ไม่พบชื่อผู้ใช้งานนี้ในระบบครับ!");
+                    showCustomAlert("ไม่พบชื่อผู้ใช้งานนี้ในระบบครับ!", "error");
                 }
             } catch (error) {
-                console.error(error);
-                alert("เกิดข้อผิดพลาดในการเชื่อมต่อครับ");
+                showCustomAlert("การเชื่อมต่อมีปัญหาครับบอส!", "error");
             }
         };
     }

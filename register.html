@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>สมัครสมาชิก</title>
     <link rel="stylesheet" href="style-login.css">
+    <link rel="stylesheet" href="alert-style.css"> <!-- ✅ ตรวจสอบไฟล์ CSS นี้ด้วยนะครับ -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=undo" />
 </head>
 <body>
@@ -18,7 +19,6 @@
         </div>
         <h2>สมัครสมาชิก</h2>
         
-        <!-- ✅ แก้ไข: เอา action และ method ออก เพื่อป้องกัน Error 405 -->
         <div id="register-form-box">
             <div class="input-group">
                 <label>ชื่อผู้ใช้ (Username)</label>
@@ -33,7 +33,6 @@
                 <input type="password" id="reg_confirm_pass" maxlength="15" placeholder="Confirm Password (maxlength15)" required>
             </div>
             
-            <!-- ✅ เปลี่ยนเป็น type="button" เพื่อใช้ JavaScript คุม -->
             <button type="button" id="btn-create-acc" class="register-btn">สร้างบัญชี</button>
         </div>
         
@@ -58,17 +57,20 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // --- ฟังก์ชันแสดง Alert แบบที่บอสทำไว้ ---
-    function showCustomAlert(message, statusType) {
+    // --- 🟢 ฟังก์ชันแจ้งเตือนแถบโหลด (Progress Bar) ---
+    function showCustomAlert(message, type = 'success') {
         const alertBox = document.createElement('div');
         alertBox.className = 'custom-alert';
-        alertBox.innerHTML = `<span>${message}</span><div class="progress-bar progress-active"></div>`;
+        //success = สีฟ้า/เขียว, error/mismatch = สีแดง
+        const barClass = type === 'success' ? 'progress-active' : 'progress-error';
+        
+        alertBox.innerHTML = `<span>${message}</span><div class="progress-bar ${barClass}"></div>`;
         document.body.appendChild(alertBox);
 
-        // ส่ง Log ไป Firebase ตามที่บอสเคยเขียนไว้
+        // ส่ง Log ไป Firebase
         push(ref(db, 'auth_logs'), { 
             action: "Register Attempt", 
-            status: statusType, 
+            status: type, 
             time: new Date().toLocaleString('th-TH') 
         });
 
@@ -104,14 +106,19 @@
             if (snapshot.exists()) {
                 showCustomAlert("ชื่อนี้มีคนใช้แล้วครับบอส! ลองเปลี่ยนชื่อดูนะ", "exists");
             } else {
-                // 4. บันทึกลง Database (แก้ 405 ได้ถาวรเพราะไม่ใช้ POST)
+                // 4. บันทึกลง Database
                 await set(userRef, {
                     password: pass,
                     reg_date: new Date().toLocaleString('th-TH')
                 });
                 
-                alert("สร้างบัญชีสำเร็จแล้วครับบอส! ยินดีต้อนรับครับ");
-                window.location.href = "login.html"; // สมัครเสร็จพาไปหน้า Login
+                // ✅ ใช้ Custom Alert แทน alert() มาตรฐาน
+                showCustomAlert("สร้างบัญชีสำเร็จแล้วครับบอส! กำลังพาไปหน้าล็อกอิน...", "success");
+                
+                // ✅ หน่วงเวลาให้แถบโหลดวิ่งจนจบก่อนวาร์ป
+                setTimeout(() => {
+                    window.location.href = "login.html?status=registered";
+                }, 2800);
             }
         } catch (error) {
             showCustomAlert("เกิดข้อผิดพลาด: " + error.message, "error");
