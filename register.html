@@ -12,7 +12,7 @@
 <main class="register-page">
     <div class="register-container">
         <div class="pumblack">
-            <a href="index.html">
+            <a href="login.html"> <!-- ✅ เปลี่ยนให้ย้อนกลับไปหน้า Login แทนหน้าแรกเพื่อความสะดวก -->
                 <span class="material-symbols-outlined">undo</span>
             </a>
         </div>
@@ -56,48 +56,50 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // --- ฟังก์ชัน Alert แบบดั้งเดิม (ใช้เฉพาะตอนกรอกผิด) ---
-    function fastAlert(msg) {
-        alert(msg); // หรือจะใช้ showCustomAlert แบบไม่มี Delay ก็ได้ครับ แต่ถ้าบอสอยากให้เร็วก็ใช้ alert ปกติในจังหวะที่กรอกผิด
-    }
-
-    // --- ระบบสมัครสมาชิก ---
     document.getElementById('btn-create-acc').onclick = async () => {
         const user = document.getElementById('reg_user').value.trim();
         const pass = document.getElementById('reg_pass').value;
         const confirmPass = document.getElementById('reg_confirm_pass').value;
 
-        // เช็คความเรียบร้อยก่อนส่ง
         if (!user || !pass || !confirmPass) {
-            fastAlert("กรุณากรอกข้อมูลให้ครบครับบอส!");
+            alert("กรุณากรอกข้อมูลให้ครบนะบอส!");
             return;
         }
         if (pass !== confirmPass) {
-            fastAlert("รหัสผ่านไม่ตรงกันครับ!");
+            alert("รหัสผ่านไม่ตรงกันนะบอส!");
             return;
         }
 
         const userRef = ref(db, 'users/' + user);
 
         try {
+            // 1. เช็คว่าชื่อซ้ำไหม
             const snapshot = await get(userRef);
             if (snapshot.exists()) {
-                fastAlert("ชื่อนี้มีคนใช้แล้วครับ!");
-            } else {
-                // 1. บันทึกลง Database
-                await set(userRef, {
-                    password: pass,
-                    reg_date: new Date().toLocaleString('th-TH')
-                });
-                
-                // 2. ส่ง Log
-                push(ref(db, 'auth_logs'), { action: "Register Success", user: user });
-
-                // 3. ✅ วาร์ปไปหน้า Login ทันที! (หน้า Login จะเป็นคนโชว์แถบโหลดเอง)
-                window.location.href = "login.html?status=registered";
+                alert("ชื่อนี้มีคนใช้แล้วครับบอส! ลองเปลี่ยนชื่อนะ");
+                return;
             }
+
+            // 2. บันทึกข้อมูล (ใช้ await เพื่อให้มั่นใจว่าเสร็จชัวร์)
+            await set(userRef, {
+                password: pass,
+                reg_date: new Date().toLocaleString('th-TH')
+            });
+            
+            // 3. บันทึก Log
+            await push(ref(db, 'auth_logs'), { 
+                action: "Register Success", 
+                user: user, 
+                time: new Date().toLocaleString('th-TH') 
+            });
+
+            // 4. ✅ วาร์ปทันทีเมื่อทุกอย่างสำเร็จ
+            console.log("Registration Successful! Redirecting...");
+            window.location.assign("login.html?status=registered");
+
         } catch (error) {
-            fastAlert("Error: " + error.message);
+            console.error("Firebase Error:", error);
+            alert("เกิดข้อผิดพลาด: " + error.message);
         }
     };
 </script>
