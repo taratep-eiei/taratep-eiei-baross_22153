@@ -3,40 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เข้าสู่ระบบ</title>
+    <title>สมัครสมาชิก</title>
     <link rel="stylesheet" href="style-login.css">
-    <link rel="stylesheet" href="alert-style.css"> <!-- ✅ เช็คไฟล์นี้ด้วยนะครับบอส -->
+    <link rel="stylesheet" href="alert-style.css"> <!-- ✅ เช็คว่าไฟล์นี้อยู่ในโฟลเดอร์เดียวกันนะบอส -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=undo" />
 </head>
 <body>
     
-<main class="login-page">
-    <div class="login-container">
+<main class="register-page">
+    <div class="register-container">
         <div class="pumblack">
             <a href="index.html">
                 <span class="material-symbols-outlined">undo</span>
             </a>
         </div>
-        <div class="pum"><h2>เข้าสู่ระบบ</h2></div>
+        <h2>สมัครสมาชิก</h2>
         
-        <div id="login-form">
+        <div id="register-form-box">
             <div class="input-group">
-                <label>ชื่อผู้ใช้งาน</label>
-                <input type="text" id="username-input" placeholder="Username" required>
+                <label>ชื่อผู้ใช้ (Username)</label>
+                <input type="text" id="reg_user" maxlength="15" placeholder="Username (max15)" required>
             </div>
             <div class="input-group">
                 <label>รหัสผ่าน</label>
-                <input type="password" id="password-input" placeholder="Password" required>
+                <input type="password" id="reg_pass" maxlength="15" placeholder="Password (max15)" required>
             </div>
-            <button type="button" id="login-btn-main" class="login-btn">Login</button>
+            <div class="input-group">
+                <label>ยืนยันรหัสผ่าน</label>
+                <input type="password" id="reg_confirm_pass" maxlength="15" placeholder="Confirm Password" required>
+            </div>
+            
+            <button type="button" id="btn-create-acc" class="register-btn">สร้างบัญชี</button>
         </div>
-        <p class="register-link">ยังไม่มีบัญชี? <a href="register.html">สมัครสมาชิก</a></p>
+        
+        <p class="login-link">มีบัญชีอยู่แล้ว? <a href="login.html">เข้าสู่ระบบ</a></p>
     </div>
 </main>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-    import { getDatabase, ref, get, child, push } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
+    import { getDatabase, ref, set, get, push } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBF5t68YK-QDAC026L6c_OFYeCP-y3RHoA",
@@ -51,76 +57,64 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // --- 🟢 ฟังก์ชันแจ้งเตือนแถบโหลด (Progress Bar) ---
-    function showCustomAlert(message, type = 'success') {
+    // --- 🟢 ฟังก์ชันแจ้งเตือนแถบโหลด (ดึงโครงสร้างที่บอสชอบกลับมา) ---
+    function showCustomAlert(message) {
         const alertBox = document.createElement('div');
         alertBox.className = 'custom-alert';
-        // ใช้ class ตามประเภท success หรือ mismatch/error
-        const barClass = type === 'success' ? 'progress-active' : 'progress-error';
-        
-        alertBox.innerHTML = `<span>${message}</span><div class="progress-bar ${barClass}"></div>`;
+        alertBox.innerHTML = `<span>${message}</span><div class="progress-bar progress-active"></div>`;
         document.body.appendChild(alertBox);
 
         setTimeout(() => {
             alertBox.style.opacity = '0';
             setTimeout(() => alertBox.remove(), 500);
-        }, 2000);
+        }, 2500);
     }
 
-    // --- ส่วนแจ้งเตือนมาจากหน้าสมัครสมาชิก ---
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('status') === 'registered') {
-        showCustomAlert("สมัครสมาชิกสำเร็จ! เข้าสู่ระบบได้เลย", "success");
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
+    // --- ระบบสมัครสมาชิก ---
+    document.getElementById('btn-create-acc').onclick = async () => {
+        const user = document.getElementById('reg_user').value.trim();
+        const pass = document.getElementById('reg_pass').value;
+        const confirmPass = document.getElementById('reg_confirm_pass').value;
 
-    // --- ส่วนควบคุมการ Login ---
-    const loginBtn = document.getElementById('login-btn-main');
+        if (!user || !pass || !confirmPass) {
+            showCustomAlert("กรุณากรอกข้อมูลให้ครบนะบอส!");
+            return;
+        }
 
-    if (loginBtn) {
-        loginBtn.onclick = async () => {
-            const username = document.getElementById('username-input').value.trim();
-            const password = document.getElementById('password-input').value;
+        if (pass !== confirmPass) {
+            showCustomAlert("รหัสผ่านไม่ตรงกันนะบอส!");
+            return;
+        }
 
-            if (username === "" || password === "") {
-                showCustomAlert("กรุณากรอกข้อมูลให้ครบครับบอส!", "error");
-                return;
+        const userRef = ref(db, 'users/' + user);
+
+        try {
+            const snapshot = await get(userRef);
+            if (snapshot.exists()) {
+                showCustomAlert("ชื่อนี้มีคนใช้แล้วครับบอส!");
+            } else {
+                await set(userRef, {
+                    password: pass,
+                    reg_date: new Date().toLocaleString('th-TH')
+                });
+                
+                push(ref(db, 'auth_logs'), { 
+                    action: "Register Success", 
+                    user: user, 
+                    time: new Date().toLocaleString('th-TH') 
+                });
+
+                showCustomAlert("สร้างบัญชีสำเร็จแล้ว! ยินดีต้อนรับครับบอส");
+                
+                // ✅ รอแถบโหลดวิ่งให้จบก่อนวาร์ปกลับหน้า Login
+                setTimeout(() => {
+                    window.location.href = "login.html?status=registered";
+                }, 2800);
             }
-
-            try {
-                const dbRef = ref(db);
-                const snapshot = await get(child(dbRef, `users/${username}`));
-
-                if (snapshot.exists()) {
-                    const userData = snapshot.val();
-                    
-                    if (userData.password === password) {
-                        localStorage.setItem('savedUsername', username);
-                        
-                        push(ref(db, 'auth_logs'), { 
-                            action: "Login Success", 
-                            user: username, 
-                            time: new Date().toLocaleString('th-TH') 
-                        });
-
-                        showCustomAlert("ยินดีต้อนรับครับบอส! กำลังเข้าสู่ระบบ...", "success");
-                        
-                        // ✅ รอให้แถบโหลดวิ่งแป๊บนึงค่อยวาร์ปหน้า
-                        setTimeout(() => {
-                            window.location.href = "index.html";
-                        }, 2200);
-                        
-                    } else {
-                        showCustomAlert("รหัสผ่านไม่ถูกต้องนะบอส เช็กอีกทีครับ!", "error");
-                    }
-                } else {
-                    showCustomAlert("ไม่พบชื่อผู้ใช้งานนี้ในระบบครับ!", "error");
-                }
-            } catch (error) {
-                showCustomAlert("การเชื่อมต่อมีปัญหาครับบอส!", "error");
-            }
-        };
-    }
+        } catch (error) {
+            showCustomAlert("เกิดข้อผิดพลาด: " + error.message);
+        }
+    };
 </script>
 </body>
 </html>
