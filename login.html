@@ -3,36 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login / Register</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        /* สไตล์คร่าวๆ ให้บอสเอาไปปรับใช้ครับ */
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #1a1a1a; color: white; }
-        .auth-container { background: #2a2a2a; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 300px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; }
-        button { width: 100%; padding: 10px; background: #4b7bec; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
-        button:hover { background: #3867d6; }
-        .switch-text { font-size: 12px; text-align: center; margin-top: 15px; cursor: pointer; color: #aaa; }
-    </style>
+    <title>Document</title>
+    <link rel="stylesheet" href="style-login.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=undo" />
 </head>
 <body>
-
-    <div class="auth-container">
-        <h2 id="auth-title">เข้าสู่ระบบ</h2>
-        <!-- ✅ จุดตาย: พี่เอา action และ method="POST" ออก เพื่อกัน Error 405 -->
-        <div id="auth-form">
-            <input type="text" id="username" placeholder="ชื่อผู้ใช้ (Username)" required>
-            <input type="password" id="password" placeholder="รหัสผ่าน" required>
-            <button type="button" id="submit-btn">ตกลง</button>
+    
+    <main class="login-page">
+    <div class="login-container">
+        <div class="pumblack">
+            <a href="index.html">
+                <span class="material-symbols-outlined">undo</span>
+            </a>
         </div>
-        <p class="switch-text" id="switch-mode">ยังไม่มีบัญชี? สมัครสมาชิกที่นี่</p>
+        <div class="pum"><h2>เข้าสู่ระบบ</h2></div>
+        
+        <!-- เอา action ออกเพื่อให้ JS ทำงานแทนครับบอส -->
+        <form id="login-form">
+            <div class="input-group">
+                <label>ชื่อผู้ใช้งาน</label>
+                <!-- เพิ่ม id="username-input" -->
+                <input type="text" id="username-input" name="username" placeholder="Username" required>
+            </div>
+            <div class="input-group">
+                <label>รหัสผ่าน</label>
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <!-- เพิ่ม id="login-btn-main" -->
+            <button type="submit" id="login-btn-main" class="login-btn">Login</button>
+        </form>
+        <p class="register-link">ยังไม่มีบัญชี? <a href="register.html">สมัครสมาชิก</a></p>
     </div>
+</main>
+<link rel="stylesheet" href="alert-style.css">
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
 
-    // Config เดิมของบอส
     const firebaseConfig = {
         apiKey: "AIzaSyBF5t68YK-QDAC026L6c_OFYeCP-y3RHoA",
         authDomain: "wep-project-by-baross.firebaseapp.com",
@@ -46,58 +54,54 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    let isLoginMode = true;
+    // --- ส่วนแจ้งเตือนสมัครสมาชิกสำเร็จ ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('status');
 
-    // --- สลับโหมด สมัคร/ล็อกอิน ---
-    const switchBtn = document.getElementById('switch-mode');
-    const authTitle = document.getElementById('auth-title');
-    
-    switchBtn.onclick = () => {
-        isLoginMode = !isLoginMode;
-        authTitle.innerText = isLoginMode ? "เข้าสู่ระบบ" : "สมัครสมาชิก";
-        switchBtn.innerText = isLoginMode ? "ยังไม่มีบัญชี? สมัครสมาชิกที่นี่" : "มีบัญชีแล้ว? เข้าสู่ระบบ";
-    };
+    if (status === 'registered') {
+        const alertBox = document.createElement('div');
+        alertBox.className = 'custom-alert';
+        alertBox.innerHTML = `<span>สมัครสมาชิกสำเร็จ! เข้าสู่ระบบได้เลย</span><div class="progress-bar progress-active"></div>`;
+        document.body.appendChild(alertBox);
 
-    // --- ระบบจัดการข้อมูล (หัวใจหลักที่แก้ 405) ---
-    document.getElementById('submit-btn').onclick = async () => {
-        const user = document.getElementById('username').value;
-        const pass = document.getElementById('password').value;
+        push(ref(db, 'auth_logs'), { action: "Register Success", time: new Date().toLocaleString('th-TH') });
 
-        if (!user || !pass) return alert("กรุณากรอกข้อมูลให้ครบครับบอส!");
+        setTimeout(() => {
+            alertBox.style.opacity = '0';
+            setTimeout(() => alertBox.remove(), 500);
+        }, 2000);
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
 
-        const userRef = ref(db, 'users/' + user);
+    // --- ส่วนควบคุมการ Login ---
+    const loginBtn = document.getElementById('login-btn-main');
+    const userInput = document.getElementById('username-input');
 
-        if (isLoginMode) {
-            // 🔓 โหมด Login
-            try {
-                const snapshot = await get(userRef);
-                if (snapshot.exists()) {
-                    const userData = snapshot.val();
-                    if (userData.password === pass) {
-                        localStorage.setItem('savedUsername', user); // เก็บชื่อไว้ใช้หน้า index
-                        alert("เข้าสู่ระบบสำเร็จ!");
-                        window.location.href = "index.html"; // วิ่งกลับหน้าหลัก
-                    } else {
-                        alert("รหัสผ่านไม่ถูกต้อง!");
-                    }
-                } else {
-                    alert("ไม่พบชื่อผู้ใช้นี้ครับ!");
-                }
-            } catch (error) { alert("เกิดข้อผิดพลาด: " + error.message); }
-        } else {
-            // 📝 โหมดสมัครสมาชิก
-            try {
-                const snapshot = await get(userRef);
-                if (snapshot.exists()) {
-                    alert("ชื่อผู้ใช้นี้มีคนใช้แล้วครับบอส!");
-                } else {
-                    await set(userRef, { password: pass });
-                    alert("สมัครสมาชิกสำเร็จ! ลองล็อกอินดูครับ");
-                    location.reload();
-                }
-            } catch (error) { alert("สมัครไม่สำเร็จ: " + error.message); }
-        }
-    };
+    if (loginBtn) {
+        loginBtn.addEventListener('click', (e) => {
+            e.preventDefault(); // กันหน้าเว็บรีเฟรชก่อนบันทึกข้อมูล
+            
+            const username = userInput ? userInput.value : "";
+
+            if (username.trim() !== "") {
+                // 1. บันทึกชื่อลงเครื่อง
+                localStorage.setItem('savedUsername', username);
+                
+                // 2. ส่ง Log ไป Firebase
+                push(ref(db, 'auth_logs'), { 
+                    action: "Login Success", 
+                    user: username, 
+                    time: new Date().toLocaleString('th-TH') 
+                });
+
+                // 3. วาร์ปไปหน้าหลัก
+                window.location.href = "index.html";
+            } else {
+                alert("กรุณากรอกชื่อผู้ใช้งานด้วยครับบอส!");
+            }
+        });
+    }
 </script>
+</main>
 </body>
 </html>
