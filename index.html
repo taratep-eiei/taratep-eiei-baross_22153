@@ -135,14 +135,49 @@
         <p>&copy; 2026 baross. All rights reserved.</p>
     </footer>
 
-<script>
+<script type="module">
+    // --- [ส่วนที่ 0: ระบบ Firebase ดักจับ Error 405] ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBF5t68YK-QDAC026L6c_OFYeCP-y3RHoA",
+        authDomain: "wep-project-by-baross.firebaseapp.com",
+        databaseURL: "https://wep-project-by-baross-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "wep-project-by-baross",
+        storageBucket: "wep-project-by-baross.firebasestorage.app",
+        messagingSenderId: "561116818071",
+        appId: "1:561116818071:web:111006b44f0d0e8b3d57d2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // ฟังก์ชันสำหรับส่ง Error ไปที่ Firebase
+    function sendErrorToFirebase(message) {
+        const errorLogRef = ref(db, 'error_logs/405');
+        push(errorLogRef, {
+            url: window.location.href,
+            time: new Date().toLocaleString('th-TH'),
+            details: message,
+            user: localStorage.getItem('savedUsername') || 'Guest'
+        });
+        console.log("บันทึกข้อมูลเข้า Firebase แล้วครับบอส!");
+    }
+
+    // ดักจับ Error ทั่วไป (รวมถึง 405 ที่อาจเกิดจาก Fetch)
+    window.addEventListener('error', (e) => {
+        sendErrorToFirebase(e.message);
+    }, true);
+
+
     // --- 1. ฟังก์ชันเปิด/ปิด Sidebar ---
-    function openNav() {
+    window.openNav = function() {
         const sidebar = document.getElementById("mySidebar");
         if (sidebar) sidebar.style.width = "320px";
     }
 
-    function closeNav() {
+    window.closeNav = function() {
         const sidebar = document.getElementById("mySidebar");
         if (sidebar) sidebar.style.width = "0";
     }
@@ -151,7 +186,6 @@
     window.addEventListener('click', function(e) {
         const sidebar = document.getElementById("mySidebar");
         const loginBtn = document.getElementById('login-btn');
-        // ถ้าคลิกข้างนอก sidebar และไม่ใช่ปุ่ม login ให้ปิด sidebar
         if (sidebar && sidebar.style.width === "320px") {
             if (!sidebar.contains(e.target) && !loginBtn.contains(e.target)) {
                 closeNav();
@@ -177,7 +211,6 @@
         const mainImg = document.getElementById('main-profile-img');
         const sideUserText = document.getElementById('side-username');
 
-        // จัดการเรื่องรูปภาพ (ดึงจากความจำ)
         if (savedPic) {
             if (mainImg) mainImg.src = savedPic;
             if (navImg) {
@@ -187,7 +220,6 @@
         }
 
         if (savedName) {
-            // สถานะ: Login แล้ว
             if (loginBtn) {
                 loginBtn.href = "javascript:void(0)";
                 loginBtn.onclick = openNav;
@@ -198,12 +230,11 @@
             if (logoutBtn) {
                 logoutBtn.style.display = "inline-block";
                 logoutBtn.onclick = function() {
-                    localStorage.removeItem('savedUsername'); // ลบแค่ชื่อ รูปจะได้ไม่หายถ้าบอสอยากเก็บไว้
+                    localStorage.removeItem('savedUsername');
                     window.location.href = "index.html";
                 };
             }
         } else {
-            // สถานะ: Guest
             if (loginBtn) {
                 loginBtn.href = "login.html";
                 loginBtn.onclick = null;
@@ -224,7 +255,6 @@
                 reader.onload = function(event) {
                     const data = event.target.result;
                     localStorage.setItem('userProfilePic', data);
-                    // อัปเดตทันทีไม่ต้องรอ Refresh
                     document.getElementById('main-profile-img').src = data;
                     const ni = document.getElementById('nav-profile-img');
                     ni.src = data;
@@ -237,25 +267,16 @@
 
     window.onload = initApp;
 
-    function switchPhoto(clickedImg) {
-    // 1. ดึงรูปภาพทั้งหมดใน Stack ออกมา
-    const stack = document.getElementById('photoStack');
-    const allPhotos = Array.from(stack.getElementsByClassName('stack-image'));
-    const centerImg = stack.querySelector('.img-center');
-
-    // ถ้ากดอันที่เด่นอยู่แล้ว ไม่ต้องทำอะไร
-    if (clickedImg === centerImg) return;
-
-    // 2. เก็บ "คลาสตำแหน่ง" ของรูปที่ถูกคลิก และรูปตรงกลางไว้
-    const clickedClass = clickedImg.className;
-    const centerClass = centerImg.className;
-
-    // 3. สลับคลาสกันเพื่อให้ Animation ทำงาน
-    // (ใช้ replace เพื่อไม่ให้กระทบชื่อคลาสพื้นฐาน stack-image)
-    clickedImg.className = centerClass;
-    centerImg.className = clickedClass;
-}
-
+    // ระบบสลับรูปภาพ
+    window.switchPhoto = function(clickedImg) {
+        const stack = document.getElementById('photoStack');
+        const centerImg = stack.querySelector('.img-center');
+        if (clickedImg === centerImg) return;
+        const clickedClass = clickedImg.className;
+        const centerClass = centerImg.className;
+        clickedImg.className = centerClass;
+        centerImg.className = clickedClass;
+    }
 </script>
 
 </body>
