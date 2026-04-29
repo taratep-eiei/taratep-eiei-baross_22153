@@ -132,7 +132,7 @@
         }
     };
 
-    // --- 🛠️ ส่วนที่พี่แก้ให้ใหม่ (ฟังก์ชันจัดการโปรไฟล์) ---
+    // --- 2. ฟังก์ชันอัปเดต UI โปรไฟล์ ---
     const updateProfileUI = (name, photoData) => {
         const navUser = document.getElementById('nav-username');
         const sideUser = document.getElementById('side-username');
@@ -153,7 +153,7 @@
         }
     };
 
-    // ทำงานทันทีที่โหลดเสร็จ
+    // --- 3. เริ่มต้นระบบทั้งหมด ---
     const initApp = () => {
         const savedName = localStorage.getItem('savedUsername');
         const savedImg = localStorage.getItem('userProfilePic');
@@ -161,10 +161,10 @@
         const sidebar = document.getElementById("mySidebar");
         const uploadInput = document.getElementById('upload-photo');
 
-        // 1. โหลดข้อมูลเก่ามาแสดง
+        // แสดงข้อมูลที่มีอยู่
         updateProfileUI(savedName, savedImg);
 
-        // 2. ตั้งค่าปุ่ม Login/Sidebar
+        // เช็คสถานะ Login
         if (savedName) {
             loginBtn.href = "javascript:void(0)";
             loginBtn.onclick = (e) => {
@@ -174,28 +174,23 @@
             document.getElementById('logout-btn').style.display = "inline-block";
         }
 
-        // 3. 🟢 ระบบอัปโหลดรูป (แก้จุดบอด)
+        // ระบบอัปโหลดรูป
         if (uploadInput) {
             uploadInput.onchange = (e) => {
                 const file = e.target.files[0];
                 if (file) {
-                    // เช็คขนาดไฟล์ (ไม่ควรเกิน 2MB เพราะจะเซฟลง localStorage ไม่ได้)
+                    // ดักขนาดไฟล์ไม่ให้เกิน 2MB เพื่อความเสถียรของ LocalStorage
                     if (file.size > 2 * 1024 * 1024) {
-                        alert("รูปใหญ่เกินไปครับบอส! ลองหารูปที่ขนาดเล็กกว่า 2MB นะ");
+                        alert("รูปใหญ่เกินไปครับบอส! เลือกรูปไม่เกิน 2MB นะครับ");
                         return;
                     }
 
                     const reader = new FileReader();
                     reader.onload = (event) => {
                         const imageData = event.target.result;
-                        
-                        // อัปเดตรูปบนหน้าจอทันที
                         updateProfileUI(null, imageData);
+                        localStorage.setItem('userProfilePic', imageData); // เซฟรูป
 
-                        // บันทึกลงเครื่อง
-                        localStorage.setItem('userProfilePic', imageData);
-
-                        // ส่ง Log ไป Firebase
                         push(ref(db, 'activity_logs/profile'), { 
                             action: "Change Profile Picture", 
                             user: savedName || "Guest",
@@ -207,7 +202,7 @@
             };
         }
 
-        // 4. ปิด Sidebar เมื่อคลิกข้างนอก
+        // ปิด Sidebar เมื่อคลิกข้างนอก
         window.onclick = (e) => {
             if (sidebar && sidebar.style.width === "320px") {
                 if (!sidebar.contains(e.target) && !loginBtn.contains(e.target)) {
@@ -217,13 +212,12 @@
         };
     };
 
-    // เริ่มทำงาน
     initApp();
 
-    // ปุ่ม Logout
+    // --- 4. ปุ่ม Logout (แก้ใหม่: ไม่ลบรูปแล้ว) ---
     document.getElementById('logout-btn').onclick = () => {
-        localStorage.removeItem('savedUsername');
-        localStorage.removeItem('userProfilePic');
+        localStorage.removeItem('savedUsername'); // ลบแค่ชื่อเพื่อ Logout
+        // ไม่สั่งลบ userProfilePic เพื่อให้ Login กลับมาแล้วรูปยังอยู่
         location.reload();
     };
 </script>
