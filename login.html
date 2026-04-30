@@ -72,7 +72,7 @@
     // --- เช็คสถานะการสมัครสมาชิก ---
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('status') === 'registered') {
-        showCustomAlert("สมัครสมาชิกสำเร็จ! เข้าสู่ระบบได้เลย", "success");
+        showCustomAlert("สมัครสำเร็จ", "success");
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 
@@ -84,7 +84,7 @@
             const password = document.getElementById('password-input').value;
 
             if (username === "" || password === "") {
-                showCustomAlert("กรุณากรอกข้อมูลให้ครบครับบอส!", "error");
+                showCustomAlert("กรุณากรอกข้อมูลให้ครบ", "error");
                 return;
             }
 
@@ -96,16 +96,16 @@
                     const userData = snapshot.val();
                     if (userData.password === password) {
                         localStorage.setItem('savedUsername', username);
-                        showCustomAlert("ยินดีต้อนรับครับบอส! กำลังเข้าสู่ระบบ...", "success");
+                        showCustomAlert("ยินดีต้อนรับ กำลังเข้าสู่ระบบ...", "success");
                         setTimeout(() => { window.location.href = "index.html"; }, 2200);
                     } else {
-                        showCustomAlert("รหัสผ่านไม่ถูกต้องนะบอส เช็กอีกทีครับ!", "error");
+                        showCustomAlert("รหัสผ่านไม่ถูกต้อง", "error");
                     }
                 } else {
-                    showCustomAlert("ไม่พบชื่อผู้ใช้งานนี้ในระบบครับ!", "error");
+                    showCustomAlert("ไม่พบชื่อผู้ใช้งานนี้", "error");
                 }
             } catch (error) {
-                showCustomAlert("การเชื่อมต่อมีปัญหาครับบอส!", "error");
+                showCustomAlert("การเชื่อมต่อมีปัญหา", "error");
             }
         };
     }

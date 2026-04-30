@@ -80,6 +80,7 @@
     </div>
 
     <main>
+        <div class="glass-panel">
         <section class="main-container">
             <h2 class="main-title">ยินดีต้อนรับสู่เว็บเพจของฉัน</h2>
             <p class="main-info">ระบบ Dashboard ส่วนตัวที่จัดการได้ผ่านเมนูข้างชื่อของคุณ</p>
@@ -105,6 +106,8 @@
                 <div class="stack-image img-right" onclick="switchPhoto(this)"><img src="img/1000087870.jpg"></div>
                 <div class="stack-image img-right-far" onclick="switchPhoto(this)"><img src="img/1000087868.jpg"></div>
             </div>
+        </div>
+
         </div>
     </main>
 
@@ -196,7 +199,7 @@
                 const file = e.target.files[0];
                 if (file && savedName) {
                     if (file.size > 2 * 1024 * 1024) {
-                        alert("รูปใหญ่เกินไปครับบอส! ไม่เกิน 2MB นะ");
+                        alert("รูปใหญ่เกินไป! ไม่เกิน 2MB");
                         return;
                     }
                     const reader = new FileReader();

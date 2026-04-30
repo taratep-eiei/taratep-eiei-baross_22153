@@ -68,11 +68,11 @@
         const confirmPass = document.getElementById('reg_confirm_pass').value;
 
         if (!user || !pass || !confirmPass) {
-            alert("กรุณากรอกข้อมูลให้ครบนะบอส!");
+            alert("กรุณากรอกข้อมูลให้ครบ!");
             return;
         }
         if (pass !== confirmPass) {
-            alert("รหัสผ่านไม่ตรงกันนะบอส!");
+            alert("รหัสผ่านไม่ตรงกัน!");
             return;
         }
 
@@ -81,7 +81,7 @@
         try {
             const snapshot = await get(userRef);
             if (snapshot.exists()) {
-                alert("ชื่อนี้มีคนใช้แล้วครับบอส!");
+                alert("ชื่อนี้มีคนใช้แล้ว!");
                 return;
             }
 

@@ -292,25 +292,50 @@ main {
     min-height: 1000px;
 }
 
+.glass-panel {
+    background: rgba(255, 255, 255, 0.037); /* สีขาวจางมากๆ */
+    backdrop-filter: blur(3px);           /* ความเบลอของข้างหลัง */
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 30px;                   /* ความโค้งของแถบใหญ่ */
+    padding: 1.2%;                         /* ระยะห่างขอบใน */
+    margin: -5px auto;                     /* ระยะห่างขอบนอก */
+    width: 90%;                            /* ความกว้างของแถบ */
+    max-width: 840px;
+    border: 1px solid rgba(255, 11, 11, 0.1); /* ขอบบางๆ ให้ดูเหมือนกระจก */
+    box-shadow: 0px 0px 9px 3px rgba(29, 38, 50, 0.65); /* เงาจางๆ ให้ดูมีมิติ */
+    padding-bottom: 50px; /* เพิ่มพื้นที่ด้านล่างไม่ให้เนื้อหาชิดขอบเกินไป */
+    min-height: 80vh; /* 80vh คือให้ยาวประมาณ 80% ของความสูงหน้าจอ */
+}
+
+.main-title{
+    color: #f5f5f5;
+    margin-top: 10px;
+}
+
 .main-container {
-    background-color: #ffffff;
-    padding: 30px;
+    background: #131b2d;
+    padding: 20px;
     border-radius: 22px;
-    box-shadow: 0px 0px 9px 3px rgb(255, 255, 255);
+    box-shadow: 0px 0px 9px 3px rgb(29, 38, 50);
     max-width: 800px;
     margin: 0 auto;
+    
+    
+
+   
 }
 
 .main-info {
-    margin-top: 15px;
-    color: #000000;
+    color: #f5f5f5;
     line-height: 1.6;
+    padding: -10px 0px 0px 0px;
+    margin-top: 4px;
 }
 
 .main-btn {
     display: inline-block;
     background: linear-gradient(to right, #5f84ff, #feb47b);
-    color: white;
+    color: #f5f5f5;
     padding: 10px 30px;
     text-decoration: none;
     border-radius: 5px;
@@ -443,7 +468,7 @@ main {
     max-width: 800px; 
     margin: 20px auto; /* auto จะช่วยดึงให้มันมาอยู่ตรงกลางเส้นแดง */
     display: flex;     /* สั่งให้กล่องย่อยวางเรียงกันซ้าย-ขวา */
-    gap: 20px;         /* ระยะห่างระหว่างกล่องซ้ายและขวา */
+    gap: 18px;         /* ระยะห่างระหว่างกล่องซ้ายและขวา */
 }
 
 /* ตกแต่งกล่องย่อยข้างใน */
@@ -473,7 +498,7 @@ main {
     background-color: #1a253d;
 }
 /* ทำให้ดูดีในมือถือ (ถ้าจอแคบให้เรียงต่อกันเป็นแนวตั้ง) */
-@media (max-width: 600px) {
+@media (max-width: 700px) {
     .content-row {
         flex-direction: column;
         padding: 0 20px;
