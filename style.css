@@ -38,14 +38,14 @@ body {
 
 /* --- 3. Header & Navigation --- */
 header {
-    background-color: #1c1c1c;
+    background-color: #000000;
     color: white;
     padding: 16px;
     text-align: center;
 }
 
 nav {
-    background-color: #292929;
+    background-color: #111111;
     padding: 5px;
     text-align: center;
     position: sticky;
@@ -53,8 +53,8 @@ nav {
     z-index: 100;
     white-space: nowrap; 
     min-width: 600px;
-    border-top: 2px solid #434343;
-    border-bottom: 2px solid #4d4d4d;
+    border-top: 2px solid #212121;
+    border-bottom: 2px solid #262626;
     display: flex;
     align-items: center;
 }
