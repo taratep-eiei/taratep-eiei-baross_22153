@@ -107,7 +107,7 @@ nav .Contact > a:hover {
     width: 110px;
     background-color: rgba(78, 78, 78, 0.9);
     border: 3px solid #000;
-    border-radius: 5px;
+    border-radius: 17px;
     list-style: none;
     padding: 5px 0;
     top: 100%;
@@ -317,16 +317,29 @@ main {
 }
 
 .main-container {
+    flex: 1;
     background: #131b2d;
     padding: 20px;
     border-radius: 22px;
     box-shadow: 0px 0px 9px 3px rgb(29, 38, 50);
     max-width: 800px;
-    margin: 0 auto;
-    
-    
+    margin: 3.5px auto;
 
-   
+        /* เพิ่มคำสั่งนี้เพื่อให้มันขยับนุ่มๆ */
+    transition: all 0.4s ease;
+    cursor: pointer ;
+    
+}
+
+.main-container:hover {
+    /* ลอยขึ้น */
+    transform: translateY(-5px);
+    
+    /* ใส่แสงนีออนฟุ้งๆ สีเดียวกับกล่อง */
+    box-shadow: 0 0 25px rgb(29, 38, 50); 
+    
+    /* ดันสีพื้นหลังให้สว่างขึ้นนิดนึงเวลาโดนเมาส์ */
+    background-color: #1a253d;
 }
 
 .main-info {
