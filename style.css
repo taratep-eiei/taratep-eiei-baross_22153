@@ -144,7 +144,7 @@ nav .Contact > a:hover {
     flex-direction: column;
 }
 
-.Home:hover .supmenu, .About:hover .supmenu, .Services:hover .supmenu, .Contact:hover .supmenu {
+.Contact:hover .supmenu {
     display: flex;
 }
 
