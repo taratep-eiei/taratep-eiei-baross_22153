@@ -61,18 +61,54 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // --- 🟢 ระบบสมัครสมาชิก (เน้นวาร์ปชัวร์) ---
+    // --- 🌈 ฟังก์ชันเรียกหลอดโหลด (เชื่อม CSS .custom-alert ตรงๆ) ---
+    function showCustomAlert(message, type = 'success') {
+        // ลบอันเก่าออกก่อนกันซ้อน
+        const oldAlert = document.querySelector('.custom-alert');
+        if (oldAlert) oldAlert.remove();
+
+        const alertBox = document.createElement('div');
+        alertBox.className = 'custom-alert';
+        
+        // เช็คประเภทเพื่อเลือกสีหลอด (รุ้ง/แดง) และไอคอน ✅/❌
+        const barClass = type === 'success' ? 'progress-active' : 'progress-error';
+        const icon = type === 'success' ? '✅' : '❌'; 
+        
+        alertBox.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 18px;">${icon}</span>
+                <span style="font-size: 14px; font-weight: 500;">${message}</span>
+            </div>
+            <div class="progress-bar ${barClass}"></div>
+        `;
+        
+        document.body.appendChild(alertBox);
+
+        // สั่งให้ค่อยๆ ปรากฏ (Opacity)
+        setTimeout(() => { alertBox.style.opacity = '1'; }, 10);
+
+        // หายไปหลังจากหลอดวิ่งเสร็จ (2 วินาที)
+        setTimeout(() => {
+            alertBox.style.opacity = '0';
+            setTimeout(() => alertBox.remove(), 500);
+        }, 2000);
+    }
+
+    // --- 🔑 ระบบสมัครสมาชิก ---
     document.getElementById('btn-create-acc').onclick = async () => {
         const user = document.getElementById('reg_user').value.trim();
         const pass = document.getElementById('reg_pass').value;
         const confirmPass = document.getElementById('reg_confirm_pass').value;
 
+        // เช็คว่าง
         if (!user || !pass || !confirmPass) {
-            alert("กรุณากรอกข้อมูลให้ครบนะบอส!");
+            showCustomAlert("กรุณากรอกข้อมูลให้ครบ!", "error");
             return;
         }
+
+        // 🔥 เช็ครหัสไม่ตรงกัน (ขึ้นหลอดแดง)
         if (pass !== confirmPass) {
-            alert("รหัสผ่านไม่ตรงกันนะบอส!");
+            showCustomAlert("รหัสผ่านไม่ตรงกัน!", "error");
             return;
         }
 
@@ -80,35 +116,35 @@
 
         try {
             const snapshot = await get(userRef);
+            // เช็คชื่อซ้ำ
             if (snapshot.exists()) {
-                alert("ชื่อนี้มีคนใช้แล้วครับบอส!");
+                showCustomAlert("ชื่อนี้มีคนใช้แล้ว!", "error");
                 return;
             }
 
-            // บันทึกข้อมูล
+            // บันทึกข้อมูลเข้า Firebase
             await set(userRef, {
                 password: pass,
                 reg_date: new Date().toLocaleString('th-TH')
             });
             
-            // ส่ง Log
             await push(ref(db, 'auth_logs'), { action: "Register Success", user: user });
 
-            // วาร์ปทันที (หน้า Login จะเป็นคนทำแถบโหลดเอง)
-            window.location.href = "login.html?status=registered";
+            // ✅ สมัครสำเร็จ โชว์หลอดรุ้งสวยๆ ก่อนวาร์ป
+            showCustomAlert("สมัครสำเร็จ! กำลังไปหน้าล็อกอิน...", "success");
+            
+            setTimeout(() => {
+                window.location.href = "login.html?status=registered";
+            }, 2200);
 
         } catch (error) {
-            alert("เกิดข้อผิดพลาด: " + error.message);
+            showCustomAlert("เกิดข้อผิดพลาด: " + error.message, "error");
         }
     };
 
-    // ✅ Force Click: ถ้า Link ธรรมดาไม่ไป ให้ใช้ JS สั่งวาร์ป
-    document.getElementById('direct-login-link').onclick = (e) => {
-        window.location.href = "login.html";
-    };
-    document.getElementById('back-to-login').onclick = (e) => {
-        window.location.href = "login.html";
-    };
+    // ปุ่มวาร์ปกลับหน้า Login
+    document.getElementById('direct-login-link').onclick = () => window.location.href = "login.html";
+    document.getElementById('back-to-login').onclick = () => window.location.href = "login.html";
 </script>
 </body>
 </html>
