@@ -76,6 +76,34 @@ nav a {
     justify-content: center;
 }
 
+.nav-link{
+    color: white;
+    transition: all 0.4s ease;
+    cursor: pointer;
+}
+
+.nav-link :hover {
+    color: #5f84ff;
+}
+
+.menu-icon-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: white; /* ให้เป็นสีขาวตัดกับพื้นหลังดำแบบในรูป */
+    padding: 10px;
+}
+
+#hamburger-menu {
+    font-size: 28px; /* ปรับขนาดให้พอดีกับสายตา */
+    transition: 0.3s;
+}
+
+#hamburger-menu:hover {
+    color: #5f84ff; /* เวลาเอาเมาส์ชี้ ให้เปลี่ยนเป็นสีฟ้าเท่ๆ แบบธีม Forza ของบอส */
+    transform: scale(1.1);
+}
+
 nav .Home, .About, .Services, .Contact {
     font-weight: bold;
     position: relative;
