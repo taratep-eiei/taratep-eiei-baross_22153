@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
+:root {
+    --black: rgba(0, 0, 0, 0.265);
+}
+
 body {
     background-image: url("img/Black White Abstract Wallpaper.jpg");
     background-repeat: no-repeat; /*ไม่ให้รูปซ้ำ*/
@@ -9,10 +13,6 @@ body {
     background-attachment: fixed; /*ทำให้รูปไม่เลื่อนตามหน้าเว็บ*/
     font-family: "Kanit", sans-serif;
     font-weight: 300;
-}
-
-::after {
-    --black: rgba(0, 0, 0, 0.265);
 }
 
 /* .bix{
@@ -78,9 +78,9 @@ p::first-line {
     height: 100px;  
     background-color: rgba(255, 0, 0, 0.8);
     position: relative;
-    Z-index: 1;
+    z-index: 1;
     bottom: -20px;
-    opacity: 95%;
+    opacity: 0.95;
 }
 
 .boxbox2 {

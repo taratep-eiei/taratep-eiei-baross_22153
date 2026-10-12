@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,16 +22,16 @@
         
         <div id="register-form-box">
             <div class="input-group">
-                <label>ชื่อผู้ใช้ (Username)</label>
-                <input type="text" id="reg_user" maxlength="15" placeholder="Username (max15)" required>
+                <label for="reg_user">ชื่อผู้ใช้ (Username)</label>
+                <input type="text" id="reg_user" maxlength="15" minlength="3" autocomplete="username" placeholder="Username (3–15 ตัวอักษร)" required>
             </div>
             <div class="input-group">
-                <label>รหัสผ่าน</label>
-                <input type="password" id="reg_pass" maxlength="15" placeholder="Password (max15)" required>
+                <label for="reg_pass">รหัสผ่าน</label>
+                <input type="password" id="reg_pass" maxlength="15" minlength="6" autocomplete="new-password" placeholder="Password (6–15 ตัวอักษร)" required>
             </div>
             <div class="input-group">
-                <label>ยืนยันรหัสผ่าน</label>
-                <input type="password" id="reg_confirm_pass" maxlength="15" placeholder="Confirm Password" required>
+                <label for="reg_confirm_pass">ยืนยันรหัสผ่าน</label>
+                <input type="password" id="reg_confirm_pass" maxlength="15" minlength="6" autocomplete="new-password" placeholder="Confirm Password" required>
             </div>
             
             <button type="button" id="btn-create-acc" class="register-btn">สร้างบัญชี</button>
@@ -46,7 +46,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-    import { getDatabase, ref, set, get, push } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBF5t68YK-QDAC026L6c_OFYeCP-y3RHoA",
@@ -59,7 +59,10 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    const usernameToEmail = (username) =>
+        `${username.toLowerCase()}@users.wep-project-by-baross.firebaseapp.com`;
 
     // --- 🌈 ฟังก์ชันเรียกหลอดโหลด (เชื่อม CSS .custom-alert ตรงๆ) ---
     function showCustomAlert(message, type = 'success') {
@@ -73,14 +76,18 @@
         // เช็คประเภทเพื่อเลือกสีหลอด (รุ้ง/แดง) และไอคอน ✅/❌
         const barClass = type === 'success' ? 'progress-active' : 'progress-error';
         const icon = type === 'success' ? '✅' : '❌'; 
-        
-        alertBox.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 18px;">${icon}</span>
-                <span style="font-size: 14px; font-weight: 500;">${message}</span>
-            </div>
-            <div class="progress-bar ${barClass}"></div>
-        `;
+        const content = document.createElement('div');
+        content.className = 'alert-content';
+        const iconElement = document.createElement('span');
+        iconElement.className = 'alert-icon';
+        iconElement.textContent = icon;
+        const messageElement = document.createElement('span');
+        messageElement.className = 'alert-message';
+        messageElement.textContent = message;
+        const progress = document.createElement('div');
+        progress.className = `progress-bar ${barClass}`;
+        content.append(iconElement, messageElement);
+        alertBox.append(content, progress);
         
         document.body.appendChild(alertBox);
 
@@ -106,29 +113,26 @@
             return;
         }
 
+        if (!/^[a-zA-Z0-9._-]{3,15}$/.test(user)) {
+            showCustomAlert("ชื่อผู้ใช้ต้องยาว 3–15 ตัว และใช้ได้เฉพาะ a–z, 0–9, จุด, ขีดกลาง หรือขีดล่าง", "error");
+            return;
+        }
+
+        if (pass.length < 6) {
+            showCustomAlert("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร", "error");
+            return;
+        }
+
         // 🔥 เช็ครหัสไม่ตรงกัน (ขึ้นหลอดแดง)
         if (pass !== confirmPass) {
             showCustomAlert("รหัสผ่านไม่ตรงกัน!", "error");
             return;
         }
 
-        const userRef = ref(db, 'users/' + user);
+        const normalizedUser = user.toLowerCase();
 
         try {
-            const snapshot = await get(userRef);
-            // เช็คชื่อซ้ำ
-            if (snapshot.exists()) {
-                showCustomAlert("ชื่อนี้มีคนใช้แล้ว!", "error");
-                return;
-            }
-
-            // บันทึกข้อมูลเข้า Firebase
-            await set(userRef, {
-                password: pass,
-                reg_date: new Date().toLocaleString('th-TH')
-            });
-            
-            await push(ref(db, 'auth_logs'), { action: "Register Success", user: user });
+            await createUserWithEmailAndPassword(auth, usernameToEmail(normalizedUser), pass);
 
             // ✅ สมัครสำเร็จ โชว์หลอดรุ้งสวยๆ ก่อนวาร์ป
             showCustomAlert("สมัครสำเร็จ! กำลังไปหน้าล็อกอิน...", "success");
@@ -138,13 +142,14 @@
             }, 2200);
 
         } catch (error) {
-            showCustomAlert("เกิดข้อผิดพลาด: " + error.message, "error");
+            const message = error.code === 'auth/email-already-in-use'
+                ? "ชื่อนี้มีคนใช้แล้ว!"
+                : error.code === 'auth/operation-not-allowed'
+                    ? "โปรดเปิดใช้งาน Email/Password ใน Firebase Authentication ก่อน"
+                    : "สมัครไม่สำเร็จ กรุณาตรวจการเชื่อมต่อแล้วลองใหม่";
+            showCustomAlert(message, "error");
         }
     };
-
-    // ปุ่มวาร์ปกลับหน้า Login
-    document.getElementById('direct-login-link').onclick = () => window.location.href = "login.html";
-    document.getElementById('back-to-login').onclick = () => window.location.href = "login.html";
 </script>
 </body>
 </html>

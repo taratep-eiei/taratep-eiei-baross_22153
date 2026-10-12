@@ -173,6 +173,26 @@ body {
     animation: loadingBar 2s linear forwards;
 }
 
+.progress-error {
+    background: linear-gradient(to right, #ff4b4b, #ff9b7b);
+    animation: loadingBar 2s linear forwards;
+}
+
+.alert-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.alert-icon {
+    font-size: 18px;
+}
+
+.alert-message {
+    font-size: 14px;
+    font-weight: 500;
+}
+
 @keyframes loadingBar {
     from { width: 0%; }
     to { width: 100%; }

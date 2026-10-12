@@ -76,13 +76,41 @@ nav a {
     justify-content: center;
 }
 
+.nav-spacer,
+.nav-account {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.nav-account {
+    justify-content: flex-end;
+    padding-right: 20px;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 .nav-link{
     color: white;
     transition: all 0.4s ease;
     cursor: pointer;
 }
 
-.nav-link :hover {
+.nav-link:hover {
     color: #5f84ff;
 }
 
@@ -222,6 +250,10 @@ nav .Contact > a:hover {
     box-shadow: -5px 0 15px rgba(0,0,0,0.5);
 }
 
+.sidebar.is-open {
+    width: 320px;
+}
+
 .sidebar-content {
     padding: 20px;
     text-align: center;
@@ -308,7 +340,22 @@ nav .Contact > a:hover {
 }
 
 #nav-profile-img {
+    width: 30px;
+    height: 30px;
     border: 1.5px solid #00c6ff; /* ขอบฟ้าบางๆ ให้เข้ากับธีม */
+    vertical-align: middle;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 8px;
+}
+
+#logout-btn {
+    margin-left: 15px;
+    text-decoration: none;
+}
+
+#logout-btn .material-symbols-outlined {
+    color: #ff4b4b;
     vertical-align: middle;
 }
 
@@ -544,9 +591,18 @@ main {
 }
 /* ทำให้ดูดีในมือถือ (ถ้าจอแคบให้เรียงต่อกันเป็นแนวตั้ง) */
 @media (max-width: 700px) {
+    nav {
+        min-width: 0;
+        overflow-x: auto;
+    }
+
     .content-row {
         flex-direction: column;
         padding: 0 20px;
+    }
+
+    .sidebar.is-open {
+        width: min(320px, 90vw);
     }
 }
 

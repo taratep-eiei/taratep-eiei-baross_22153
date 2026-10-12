@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,12 +19,12 @@
 
     <nav>
         <div class="menu-icon-container">
-    <span class="material-symbols-outlined" id="hamburger-menu">menu</span>
-</div>
+            <span class="material-symbols-outlined" id="hamburger-menu">menu</span>
+        </div>
 
-        <div style="flex:1;"></div>
+        <div class="nav-spacer"></div>
 
-        <div style="flex:1; display:flex; justify-content:center;">
+        <div class="nav-center">
             <div class="Home">
                 <a href="index.html">Home</a> <span class="step-line">|</span>
                 <ul class="supmenu">
@@ -55,25 +55,25 @@
             </div>
         </div>
 
-        <div style="flex:1; display:flex; justify-content:flex-end; align-items: center; padding-right: 20px;">
+        <div class="nav-account">
             <a href="login.html" class="nav-link" id="login-btn">
-                <img src="" id="nav-profile-img" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover; margin-right: 8px; display: none;">
+                <img src="" id="nav-profile-img" alt="" hidden>
                 <span id="nav-username">เข้าสู่ระบบ</span>
             </a>
-            <a href="javascript:void(0)" id="logout-btn" style="display: none; margin-left: 15px; text-decoration: none;">
+            <a href="#" id="logout-btn" hidden>
                 <span class="material-symbols-outlined" style="vertical-align: middle; color: #ff4b4b;">logout</span>
             </a>
         </div>
     </nav>
 
-    <div id="mySidebar" class="sidebar" style="width: 0; overflow-x: hidden; transition: 0.5s;">
+    <div id="mySidebar" class="sidebar">
         <div class="sidebar-content">
             <div class="profile-section">
                 <label for="upload-photo" class="upload-label">
                     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Baross" alt="Profile" class="side-img" id="main-profile-img">
                     <div class="upload-text">คลิกเพื่อเปลี่ยนรูป</div>
                 </label>
-                <input type="file" id="upload-photo" style="display:none" accept="image/*">
+                <input type="file" id="upload-photo" class="visually-hidden" accept="image/*">
                 <h2 id="side-username">Guest</h2>
                 <p id="side-status" class="status-text">Online</p>
             </div>
@@ -126,6 +126,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
         import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBF5t68YK-QDAC026L6c_OFYeCP-y3RHoA",
@@ -138,6 +139,7 @@
         };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        const auth = getAuth(app);
 
         // --- 1. ระบบสลับรูป (Carousel) ---
         // ใช้ window. เพื่อให้ HTML มองเห็นฟังก์ชันที่อยู่ใน Module
@@ -186,10 +188,9 @@
 
         const initApp = () => {
             // 🔥 สำคัญ: สั่งให้ AOS ทำงาน
-            AOS.init({
-                duration: 1000,
-                once: false
-            });
+            if (window.AOS) {
+                window.AOS.init({ duration: 1000, once: false });
+            }
 
             const savedName = localStorage.getItem('savedUsername');
             const loginBtn = document.getElementById('login-btn');
@@ -200,12 +201,11 @@
                 const userSpecificImg = localStorage.getItem('userProfilePic_' + savedName);
                 updateProfileUI(savedName, userSpecificImg);
 
-                loginBtn.href = "javascript:void(0)";
                 loginBtn.onclick = (e) => {
                     e.preventDefault();
-                    sidebar.style.width = "320px";
+                    sidebar.classList.add('is-open');
                 };
-                document.getElementById('logout-btn').style.display = "inline-block";
+                document.getElementById('logout-btn').hidden = false;
             }
 
             if (uploadInput) {
@@ -224,9 +224,9 @@
             }
 
             window.onclick = (e) => {
-                if (sidebar && sidebar.style.width === "320px") {
+                if (sidebar && sidebar.classList.contains('is-open')) {
                     if (!sidebar.contains(e.target) && !loginBtn.contains(e.target)) {
-                        sidebar.style.width = "0";
+                        sidebar.classList.remove('is-open');
                     }
                 }
             };
@@ -234,9 +234,14 @@
 
         initApp();
 
-        document.getElementById('logout-btn').onclick = () => {
-            localStorage.removeItem('savedUsername');
-            location.reload();
+        document.getElementById('logout-btn').onclick = async (event) => {
+            event.preventDefault();
+            try {
+                await signOut(auth);
+            } finally {
+                localStorage.removeItem('savedUsername');
+                location.reload();
+            }
         };
     </script>
     
