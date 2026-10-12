@@ -231,19 +231,17 @@
 
             menuToggle.onclick = () => {
                 const willOpen = !menuSidebar.classList.contains('is-open');
-                sidebar.classList.remove('is-open');
                 menuSidebar.classList.toggle('is-open', willOpen);
                 menuSidebar.setAttribute('aria-hidden', String(!willOpen));
                 menuToggle.setAttribute('aria-expanded', String(willOpen));
             };
 
             document.querySelector('.sidebar-close').onclick = closeMenu;
-            menuSidebar.querySelectorAll('.drawer-link').forEach((link) => {
+            menuSidebar.querySelectorAll('a.drawer-link').forEach((link) => {
                 link.addEventListener('click', closeMenu);
             });
 
             profileDrawerToggle.onclick = () => {
-                closeMenu();
                 if (savedName) {
                     sidebar.classList.add('is-open');
                 } else {
@@ -258,7 +256,6 @@
 
                 loginBtn.onclick = (e) => {
                     e.preventDefault();
-                    closeMenu();
                     sidebar.classList.add('is-open');
                 };
                 document.getElementById('logout-btn').hidden = false;
@@ -281,12 +278,13 @@
 
             window.onclick = (e) => {
                 if (sidebar && sidebar.classList.contains('is-open')) {
-                    if (!sidebar.contains(e.target) && !loginBtn.contains(e.target)) {
+                    if (!sidebar.contains(e.target) && !loginBtn.contains(e.target) &&
+                        !menuToggle.contains(e.target) && !menuSidebar.contains(e.target)) {
                         sidebar.classList.remove('is-open');
                     }
                 }
                 if (menuSidebar.classList.contains('is-open') &&
-                    !menuSidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                    !menuSidebar.contains(e.target) && !menuToggle.contains(e.target) && !sidebar.contains(e.target)) {
                     closeMenu();
                 }
             };
