@@ -25,15 +25,15 @@
         <div id="register-form-box">
             <div class="input-group">
                 <label for="reg_user">ชื่อผู้ใช้ (Username)</label>
-                <input type="text" id="reg_user" maxlength="15" minlength="3" autocomplete="username" placeholder="Username (3–15 ตัวอักษร)" required>
+                <input type="text" id="reg_user" maxlength="15" autocomplete="username" placeholder="Username (ไม่เกิน 15 ตัวอักษร)" required>
             </div>
             <div class="input-group">
                 <label for="reg_pass">รหัสผ่าน</label>
-                <input type="password" id="reg_pass" maxlength="15" minlength="6" autocomplete="new-password" placeholder="Password (6–15 ตัวอักษร)" required>
+                <input type="password" id="reg_pass" maxlength="15" autocomplete="new-password" placeholder="Password (ไม่เกิน 15 ตัวอักษร)" required>
             </div>
             <div class="input-group">
                 <label for="reg_confirm_pass">ยืนยันรหัสผ่าน</label>
-                <input type="password" id="reg_confirm_pass" maxlength="15" minlength="6" autocomplete="new-password" placeholder="Confirm Password" required>
+                <input type="password" id="reg_confirm_pass" maxlength="15" autocomplete="new-password" placeholder="ยืนยันรหัสผ่าน" required>
             </div>
             
             <button type="button" id="btn-create-acc" class="register-btn">สร้างบัญชี</button>
@@ -48,7 +48,8 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
+    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
+    import { createPasswordCredential } from "./password-utils.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBF5t68YK-QDAC026L6c_OFYeCP-y3RHoA",
@@ -61,10 +62,7 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    const usernameToEmail = (username) =>
-        `${username.toLowerCase()}@users.wep-project-by-baross.firebaseapp.com`;
+    const db = getDatabase(app);
 
     function showCustomAlert(message, type = 'success') {
         const oldAlert = document.querySelector('.custom-alert');
@@ -109,13 +107,8 @@
             return;
         }
 
-        if (!/^[a-zA-Z0-9._-]{3,15}$/.test(user)) {
-            showCustomAlert("ชื่อผู้ใช้ต้องยาว 3–15 ตัว และใช้ได้เฉพาะ a–z, 0–9, จุด, ขีดกลาง หรือขีดล่าง", "error");
-            return;
-        }
-
-        if (pass.length < 6) {
-            showCustomAlert("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร", "error");
+        if (!/^[a-zA-Z0-9_-]{1,15}$/.test(user)) {
+            showCustomAlert("ชื่อผู้ใช้ใช้ได้เฉพาะ a–z, 0–9, ขีดกลาง และขีดล่าง (ไม่เกิน 15 ตัว)", "error");
             return;
         }
 
@@ -125,9 +118,22 @@
         }
 
         const normalizedUser = user.toLowerCase();
+        const userRef = ref(db, `users/${normalizedUser}`);
 
         try {
-            await createUserWithEmailAndPassword(auth, usernameToEmail(normalizedUser), pass);
+            const snapshot = await get(userRef);
+            const existingUser = snapshot.val();
+            if (snapshot.exists() && (existingUser.passwordHash || typeof existingUser.password === 'string')) {
+                showCustomAlert("ชื่อนี้มีคนใช้แล้ว", "error");
+                return;
+            }
+
+            const passwordCredential = await createPasswordCredential(pass);
+            await set(userRef, {
+                username: normalizedUser,
+                ...passwordCredential,
+                reg_date: new Date().toISOString()
+            });
 
             showCustomAlert("สมัครสำเร็จ! กำลังไปหน้าล็อกอิน...", "success");
             
@@ -136,18 +142,10 @@
             }, 2200);
 
         } catch (error) {
-            console.error('Firebase registration failed:', error);
-            const messageByCode = {
-                'auth/email-already-in-use': 'ชื่อนี้มีคนใช้แล้ว',
-                'auth/invalid-email': 'Firebase ไม่ยอมรับรูปแบบอีเมลที่สร้างจากชื่อผู้ใช้ กรุณาตรวจการตั้งค่า Firebase Authentication',
-                'auth/operation-not-allowed': 'โปรเจกต์ Firebase ยังไม่เปิด Email/Password ใน Authentication',
-                'auth/unauthorized-domain': 'โดเมนเว็บนี้ยังไม่ได้เพิ่มใน Firebase Authentication > Settings > Authorized domains',
-                'auth/network-request-failed': 'เชื่อมต่อ Firebase ไม่ได้ ตรวจอินเทอร์เน็ตและเปิดเว็บผ่าน localhost หรือ HTTPS',
-                'auth/invalid-api-key': 'Firebase API key ไม่ถูกต้อง กรุณาตรวจ firebaseConfig',
-                'auth/weak-password': 'รหัสผ่านไม่ผ่านข้อกำหนดของ Firebase'
-            };
-            const message = messageByCode[error.code] ||
-                `สมัครไม่สำเร็จ (${error.code || 'unknown'}): ${error.message || 'ไม่พบรายละเอียด error'}`;
+            console.error('Firebase Database registration failed:', error);
+            const message = /PERMISSION_DENIED/i.test(error.message || '')
+                ? 'Firebase Database ปฏิเสธการบันทึก ตรวจสอบ Realtime Database Rules'
+                : `สมัครไม่สำเร็จ: ${error.message || error.code || 'ตรวจสอบการเชื่อมต่อ Firebase'}`;
             showCustomAlert(message, "error");
         }
     };

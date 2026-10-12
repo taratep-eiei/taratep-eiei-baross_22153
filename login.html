@@ -13,35 +13,26 @@
 </button>
 <main class="login-page">
     <div class="login-container">
-        <div class="pumblack">
-            
-            <a href="index.html">
-                <span class="material-symbols-outlined">undo</span>
-            </a>
-        </div>
+        <div class="pumblack"><a href="index.html"><span class="material-symbols-outlined">undo</span></a></div>
         <div class="pum"><h2>เข้าสู่ระบบ</h2></div>
-        
         <div id="login-form">
             <div class="input-group">
                 <label for="username-input">ชื่อผู้ใช้งาน</label>
-                <input type="text" id="username-input" autocomplete="username" placeholder="Username" required>
+                <input type="text" id="username-input" autocomplete="username" placeholder="Username" maxlength="15" required>
             </div>
             <div class="input-group">
                 <label for="password-input">รหัสผ่าน</label>
-                <input type="password" id="password-input" autocomplete="current-password" placeholder="Password" required>
+                <input type="password" id="password-input" autocomplete="current-password" placeholder="Password" maxlength="15" required>
             </div>
-            <button type="button" id="login-btn-main" class="login-btn">Login</button>
+            <button type="button" id="login-btn-main" class="login-btn">เข้าสู่ระบบ</button>
         </div>
-        
-        
         <p class="register-link">ยังไม่มีบัญชี? <a href="register.html" id="link-to-reg">สมัครสมาชิก</a></p>
     </div>
 </main>
-
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
     import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-database.js";
+    import { createPasswordCredential, verifyPassword } from "./password-utils.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBF5t68YK-QDAC026L6c_OFYeCP-y3RHoA",
@@ -53,111 +44,76 @@
         appId: "1:561116818071:web:111006b44f0d0e8b3d57d2"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-
-    const usernameToEmail = (username) =>
-        `${username.toLowerCase()}@users.wep-project-by-baross.firebaseapp.com`;
+    const db = getDatabase(initializeApp(firebaseConfig));
 
     function showCustomAlert(message, type = 'success') {
+        const oldAlert = document.querySelector('.custom-alert');
+        if (oldAlert) oldAlert.remove();
         const alertBox = document.createElement('div');
         alertBox.className = 'custom-alert';
-        const barClass = type === 'success' ? 'progress-active' : 'progress-error';
         const messageElement = document.createElement('span');
         messageElement.textContent = message;
         const progress = document.createElement('div');
-        progress.className = `progress-bar ${barClass}`;
+        progress.className = `progress-bar ${type === 'success' ? 'progress-active' : 'progress-error'}`;
         alertBox.append(messageElement, progress);
         document.body.appendChild(alertBox);
-
-        const visibleDuration = type === 'error' ? 5000 : 2000;
+        const duration = type === 'error' ? 5000 : 2000;
         setTimeout(() => {
             alertBox.style.opacity = '0';
             setTimeout(() => alertBox.remove(), 500);
-        }, visibleDuration);
+        }, duration);
     }
 
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('status') === 'registered') {
-        showCustomAlert("สมัครสำเร็จ", "success");
+        showCustomAlert('สมัครสำเร็จ', 'success');
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    const loginBtn = document.getElementById('login-btn-main');
-    if (loginBtn) {
-        loginBtn.onclick = async () => {
-            const username = document.getElementById('username-input').value.trim();
-            const password = document.getElementById('password-input').value;
+    document.getElementById('login-btn-main').onclick = async () => {
+        const username = document.getElementById('username-input').value.trim();
+        const password = document.getElementById('password-input').value;
+        if (!username || !password) {
+            showCustomAlert('กรุณากรอกข้อมูลให้ครบ', 'error');
+            return;
+        }
+        if (!/^[a-zA-Z0-9_-]{1,15}$/.test(username)) {
+            showCustomAlert('ชื่อผู้ใช้ใช้ได้เฉพาะ a-z, 0-9, ขีดกลาง และขีดล่าง (ไม่เกิน 15 ตัว)', 'error');
+            return;
+        }
 
-            if (username === "" || password === "") {
-                showCustomAlert("กรุณากรอกข้อมูลให้ครบ", "error");
+        const normalizedUsername = username.toLowerCase();
+        try {
+            const userRef = ref(db, `users/${normalizedUsername}`);
+            const snapshot = await get(userRef);
+            if (!snapshot.exists()) {
+                showCustomAlert('ไม่พบชื่อผู้ใช้นี้', 'error');
                 return;
             }
-
-            if (!/^[a-zA-Z0-9._-]{3,15}$/.test(username)) {
-                showCustomAlert("ชื่อผู้ใช้ไม่ถูกต้อง", "error");
-                return;
-            }
-
-            try {
-                const normalizedUsername = username.toLowerCase();
-                try {
-                    await signInWithEmailAndPassword(auth, usernameToEmail(normalizedUsername), password);
-                } catch (authError) {
-                    const canMigrate = authError.code === 'auth/invalid-credential' ||
-                        authError.code === 'auth/user-not-found' ||
-                        authError.code === 'auth/invalid-login-credentials';
-                    if (!canMigrate) throw authError;
-
-                    
-                    let legacyRef = ref(db, `users/${normalizedUsername}`);
-                    let legacySnapshot = await get(legacyRef);
-                    let legacyUser = legacySnapshot.val();
-                    if (!legacySnapshot.exists() && username !== normalizedUsername) {
-                        legacyRef = ref(db, `users/${username}`);
-                        legacySnapshot = await get(legacyRef);
-                        legacyUser = legacySnapshot.val();
-                    }
-                    if (!legacySnapshot.exists() || legacyUser.password !== password) throw authError;
-
-                    const credential = await createUserWithEmailAndPassword(
-                        auth,
-                        usernameToEmail(normalizedUsername),
-                        password
-                    );
-                    await update(legacyRef, {
-                        password: null,
-                        uid: credential.user.uid,
-                        username: normalizedUsername,
-                        migrated_at: new Date().toISOString()
-                    });
+            const user = snapshot.val();
+            let valid = await verifyPassword(password, user);
+            if (!valid && typeof user.password === 'string') {
+                valid = user.password === password;
+                if (valid) {
+                    const credential = await createPasswordCredential(password);
+                    await update(userRef, { password: null, ...credential, username: normalizedUsername });
                 }
-                localStorage.setItem('savedUsername', username.toLowerCase());
-                showCustomAlert("ยินดีต้อนรับ กำลังเข้าสู่ระบบ...", "success");
-                setTimeout(() => { window.location.href = "index.html"; }, 1200);
-            } catch (error) {
-                console.error('Firebase sign-in failed:', error);
-                const messageByCode = {
-                    'auth/invalid-credential': 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
-                    'auth/invalid-login-credentials': 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
-                    'auth/user-not-found': 'ไม่พบบัญชีนี้ใน Firebase Authentication',
-                    'auth/operation-not-allowed': 'โปรเจกต์ Firebase ยังไม่เปิด Email/Password ใน Authentication',
-                    'auth/unauthorized-domain': 'โดเมนเว็บนี้ยังไม่ได้เพิ่มใน Firebase Authentication > Settings > Authorized domains',
-                    'auth/network-request-failed': 'เชื่อมต่อ Firebase ไม่ได้ ตรวจอินเทอร์เน็ตและเปิดเว็บผ่าน localhost หรือ HTTPS',
-                    'auth/invalid-api-key': 'Firebase API key ไม่ถูกต้อง กรุณาตรวจ firebaseConfig',
-                    'auth/too-many-requests': 'Firebase ระงับการลองชั่วคราว กรุณารอสักครู่แล้วลองใหม่'
-                };
-                const message = messageByCode[error.code] ||
-                    (/PERMISSION_DENIED/i.test(error.message || '')
-                        ? 'Firebase Realtime Database ปฏิเสธการย้ายบัญชีเดิม กรุณาตรวจ Database Rules'
-                        : `เข้าสู่ระบบไม่สำเร็จ (${error.code || 'unknown'})`);
-                showCustomAlert(message, "error");
             }
-        };
-    }
-
-    
+            if (!valid) {
+                showCustomAlert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'error');
+                return;
+            }
+            localStorage.setItem('savedUsername', normalizedUsername);
+            showCustomAlert('ยินดีต้อนรับ กำลังเข้าสู่ระบบ...', 'success');
+            setTimeout(() => { window.location.href = 'index.html'; }, 1200);
+        } catch (error) {
+            console.error('Database sign-in failed:', error);
+            const message = /PERMISSION_DENIED/i.test(error.message || '')
+                ? 'Firebase Database ปฏิเสธการอ่านข้อมูล กรุณาตรวจสอบ Realtime Database Rules'
+                : `เข้าสู่ระบบไม่สำเร็จ: ${error.message || error.code || 'ตรวจสอบการเชื่อมต่อ Firebase'}`;
+            showCustomAlert(message, 'error');
+        }
+    };
 </script>
 <script src="theme.js"></script>
 </body>
