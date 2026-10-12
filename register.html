@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>สมัครสมาชิก</title>
     <link rel="stylesheet" href="style-login.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=undo" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
 <body>
-    
+<button class="round-control theme-toggle auth-theme-toggle" type="button" aria-label="เปลี่ยนเป็นธีมสว่าง" aria-pressed="false">
+    <span class="material-symbols-outlined" aria-hidden="true">light_mode</span>
+</button>
 <main class="register-page">
     <div class="register-container">
-        <!-- 🔙 ปุ่มย้อนกลับ (เน้นให้กดง่ายขึ้น) -->
+        
         <div class="pumblack">
             <a href="login.html" id="back-to-login">
                 <span class="material-symbols-outlined">undo</span>
@@ -37,7 +39,7 @@
             <button type="button" id="btn-create-acc" class="register-btn">สร้างบัญชี</button>
         </div>
         
-        <!-- 🔗 ปุ่มเข้าสู่ระบบ (จุดที่มีปัญหา) -->
+        
         <p class="login-link">
             มีบัญชีอยู่แล้ว? <a href="login.html" id="direct-login-link">เข้าสู่ระบบ</a>
         </p>
@@ -64,16 +66,13 @@
     const usernameToEmail = (username) =>
         `${username.toLowerCase()}@users.wep-project-by-baross.firebaseapp.com`;
 
-    // --- 🌈 ฟังก์ชันเรียกหลอดโหลด (เชื่อม CSS .custom-alert ตรงๆ) ---
     function showCustomAlert(message, type = 'success') {
-        // ลบอันเก่าออกก่อนกันซ้อน
         const oldAlert = document.querySelector('.custom-alert');
         if (oldAlert) oldAlert.remove();
 
         const alertBox = document.createElement('div');
         alertBox.className = 'custom-alert';
         
-        // เช็คประเภทเพื่อเลือกสีหลอด (รุ้ง/แดง) และไอคอน ✅/❌
         const barClass = type === 'success' ? 'progress-active' : 'progress-error';
         const icon = type === 'success' ? '✅' : '❌'; 
         const content = document.createElement('div');
@@ -91,23 +90,19 @@
         
         document.body.appendChild(alertBox);
 
-        // สั่งให้ค่อยๆ ปรากฏ (Opacity)
         setTimeout(() => { alertBox.style.opacity = '1'; }, 10);
 
-        // หายไปหลังจากหลอดวิ่งเสร็จ (2 วินาที)
         setTimeout(() => {
             alertBox.style.opacity = '0';
             setTimeout(() => alertBox.remove(), 500);
         }, 2000);
     }
 
-    // --- 🔑 ระบบสมัครสมาชิก ---
     document.getElementById('btn-create-acc').onclick = async () => {
         const user = document.getElementById('reg_user').value.trim();
         const pass = document.getElementById('reg_pass').value;
         const confirmPass = document.getElementById('reg_confirm_pass').value;
 
-        // เช็คว่าง
         if (!user || !pass || !confirmPass) {
             showCustomAlert("กรุณากรอกข้อมูลให้ครบ!", "error");
             return;
@@ -123,7 +118,6 @@
             return;
         }
 
-        // 🔥 เช็ครหัสไม่ตรงกัน (ขึ้นหลอดแดง)
         if (pass !== confirmPass) {
             showCustomAlert("รหัสผ่านไม่ตรงกัน!", "error");
             return;
@@ -134,7 +128,6 @@
         try {
             await createUserWithEmailAndPassword(auth, usernameToEmail(normalizedUser), pass);
 
-            // ✅ สมัครสำเร็จ โชว์หลอดรุ้งสวยๆ ก่อนวาร์ป
             showCustomAlert("สมัครสำเร็จ! กำลังไปหน้าล็อกอิน...", "success");
             
             setTimeout(() => {
@@ -151,5 +144,6 @@
         }
     };
 </script>
+<script src="theme.js"></script>
 </body>
 </html>

@@ -7,18 +7,82 @@
     font-family: "Kanit", sans-serif;
 }
 
-/* --- ลบพื้นหลังสีเทาออก ปล่อยให้เคลียร์ --- */
+
 body {
     min-height: 100vh;
     width: 100%;
     overflow-x: hidden;
 }
 
-/* --- พื้นหลังสีดำไล่ระดับ (ปรับให้กว้างเต็มจอ 100%) --- */
+html[data-theme="light"] body {
+    background: #edf1f8;
+}
+
+.auth-theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1100;
+}
+
+html[data-theme="light"] .login-page,
+html[data-theme="light"] .register-page {
+    background: linear-gradient(180deg, #eef2fa 0%, #dce4f3 100%);
+}
+
+html[data-theme="light"] .login-container,
+html[data-theme="light"] .register-container {
+    background: rgba(255, 255, 255, 0.72);
+    color: #202638;
+    border-color: rgba(62, 83, 130, 0.25);
+    box-shadow: 0 15px 35px rgba(36, 48, 76, 0.18);
+}
+
+html[data-theme="light"] .input-group input {
+    color: #202638;
+    background: rgba(255, 255, 255, 0.72);
+    border-color: rgba(62, 83, 130, 0.25);
+}
+
+html[data-theme="light"] .input-group input::placeholder {
+    color: #78839b;
+}
+
+html[data-theme="light"] .material-symbols-outlined {
+    color: #34405b;
+}
+
+.auth-theme-toggle {
+    width: 46px;
+    height: 46px;
+    border: 1px solid rgba(127, 145, 185, 0.35);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgba(127, 145, 185, 0.16);
+    color: white;
+    cursor: pointer;
+}
+
+.auth-theme-toggle .material-symbols-outlined {
+    color: inherit;
+}
+
+html[data-theme="light"] .auth-theme-toggle {
+    background: rgba(255, 255, 255, 0.85);
+    color: #34405b;
+}
+
+.auth-theme-toggle:hover {
+    transform: translateY(-2px);
+    border-color: #5f84ff;
+}
+
+
 .login-page, .register-page {
     background: linear-gradient(180deg, #1a1a1a 0%, #3c3c3c 100%);
     min-height: 100vh;
-    width: 100%; /* ให้กว้างเต็มจอไปเลย */
+    width: 100%; 
     display: flex;
     justify-content: center;
     align-items: center;
@@ -26,12 +90,12 @@ body {
     z-index: 1;
 }
 
-/* --- ปุ่มย้อนกลับ (อยู่บนสุด กดติดแน่นอน) --- */
+
 .pumblack {
     position: absolute;
     top: 20px;
     left: 20px;
-    z-index: 999; /* อยู่บนสุดทะลุทุกเลเยอร์ */
+    z-index: 999; 
     cursor: pointer;
     text-align: center;
     pointer-events: auto;
@@ -41,7 +105,7 @@ body {
     font-variation-settings: 'FILL' 0, 'wght' 700, 'GRAD' 0, 'opsz' 30;
     color: white;
     font-size: 24px;
-    pointer-events: none; /* ให้แรงกดทะลุไปหาตัว .pumblack */
+    pointer-events: none; 
 }
 
 .pumblack:hover .material-symbols-outlined {
@@ -50,7 +114,7 @@ body {
     transition: 0.3s;
 }
 
-/* --- กล่องคอนเทนเนอร์ (Glassmorphism) --- */
+
 .login-container, .register-container {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(15px);
@@ -66,19 +130,19 @@ body {
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
     transition: 0.3s;
     position: relative;
-    z-index: 10; /* ลอยอยู่เหนือพื้นหลัง */
+    z-index: 10; 
 }
 
 .login-container:hover {
     transform: translateY(-10px);
 }
 
-/* --- ช่องกรอกข้อมูล --- */
+
 .input-group {
     text-align: left;
     margin-bottom: 15px;
     position: relative;
-    z-index: 20; /* ลอยอยู่เหนือกระจก เพื่อให้คลิกพิมพ์ได้ */
+    z-index: 20; 
 }
 
 .input-group label {
@@ -104,7 +168,7 @@ body {
     background: rgba(255, 255, 255, 0.1);
 }
 
-/* --- ปุ่มล็อกอิน/สมัครสมาชิก --- */
+
 .login-btn, .register-btn {
     width: 100%;
     padding: 12px;
@@ -117,7 +181,7 @@ body {
     cursor: pointer;
     transition: 0.3s;
     position: relative;
-    z-index: 20; /* ลอยเหนือกระจก เพื่อให้กดได้ */
+    z-index: 20; 
 }
 
 .login-btn:hover, .register-btn:hover {
@@ -125,7 +189,7 @@ body {
     box-shadow: 0 5px 15px rgba(254, 180, 123, 0.4);
 }
 
-/* --- ลิงก์สมัครสมาชิก / เข้าสู่ระบบ --- */
+
 .register-link, .login-link {
     margin-top: 20px;
     position: relative;
@@ -143,7 +207,7 @@ body {
     text-decoration: underline;
 }
 
-/* --- ส่วนของ Alert โหลดดิ้ง --- */
+
 .custom-alert {
     position: fixed;
     top: 20px;

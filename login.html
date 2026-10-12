@@ -5,14 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เข้าสู่ระบบ</title>
     <link rel="stylesheet" href="style-login.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=undo" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
 <body>
-    
+<button class="round-control theme-toggle auth-theme-toggle" type="button" aria-label="เปลี่ยนเป็นธีมสว่าง" aria-pressed="false">
+    <span class="material-symbols-outlined" aria-hidden="true">light_mode</span>
+</button>
 <main class="login-page">
     <div class="login-container">
         <div class="pumblack">
-            <!-- ปุ่มย้อนกลับไปหน้า Index -->
+            
             <a href="index.html">
                 <span class="material-symbols-outlined">undo</span>
             </a>
@@ -31,7 +33,7 @@
             <button type="button" id="login-btn-main" class="login-btn">Login</button>
         </div>
         
-        <!-- ✅ จุดสำคัญ: ลิงก์ไปหน้าสมัครสมาชิก -->
+        
         <p class="register-link">ยังไม่มีบัญชี? <a href="register.html" id="link-to-reg">สมัครสมาชิก</a></p>
     </div>
 </main>
@@ -58,7 +60,6 @@
     const usernameToEmail = (username) =>
         `${username.toLowerCase()}@users.wep-project-by-baross.firebaseapp.com`;
 
-    // --- 🟢 ฟังก์ชันแจ้งเตือนแถบโหลด ---
     function showCustomAlert(message, type = 'success') {
         const alertBox = document.createElement('div');
         alertBox.className = 'custom-alert';
@@ -76,14 +77,12 @@
         }, 2000);
     }
 
-    // --- เช็คสถานะการสมัครสมาชิก ---
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('status') === 'registered') {
         showCustomAlert("สมัครสำเร็จ", "success");
         window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    // --- 🔑 ระบบ Login ---
     const loginBtn = document.getElementById('login-btn-main');
     if (loginBtn) {
         loginBtn.onclick = async () => {
@@ -110,7 +109,7 @@
                         authError.code === 'auth/invalid-login-credentials';
                     if (!canMigrate) throw authError;
 
-                    // Migrate older accounts once, then remove their plaintext password from Realtime Database.
+                    
                     let legacyRef = ref(db, `users/${normalizedUsername}`);
                     let legacySnapshot = await get(legacyRef);
                     let legacyUser = legacySnapshot.val();
@@ -145,7 +144,8 @@
         };
     }
 
-    // ✅ ฟังก์ชันกันเหนียว: ถ้าคลิกแล้วไม่ไป ให้ JavaScript สั่งวาร์ป
+    
 </script>
+<script src="theme.js"></script>
 </body>
 </html>

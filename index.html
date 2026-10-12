@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="style.css">
     <meta name="google" content="notranslate">
     <meta http-equiv="Content-Language" content="th">
-    <!-- 1. AOS CSS -->
+    
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 </head>
 <body>
@@ -19,7 +19,9 @@
 
     <nav>
         <div class="menu-icon-container">
-            <span class="material-symbols-outlined" id="hamburger-menu">menu</span>
+            <button class="menu-toggle" id="menu-toggle" type="button" aria-label="เปิดเมนู" aria-expanded="false" aria-controls="menuSidebar">
+                <span class="material-symbols-outlined" id="hamburger-menu" aria-hidden="true">menu</span>
+            </button>
         </div>
 
         <div class="nav-spacer"></div>
@@ -56,12 +58,15 @@
         </div>
 
         <div class="nav-account">
+            <button class="round-control theme-toggle" type="button" aria-label="เปลี่ยนเป็นธีมสว่าง" aria-pressed="false">
+                <span class="material-symbols-outlined" aria-hidden="true">light_mode</span>
+            </button>
             <a href="login.html" class="nav-link" id="login-btn">
                 <img src="" id="nav-profile-img" alt="" hidden>
                 <span id="nav-username">เข้าสู่ระบบ</span>
             </a>
             <a href="#" id="logout-btn" hidden>
-                <span class="material-symbols-outlined" style="vertical-align: middle; color: #ff4b4b;">logout</span>
+                <span class="material-symbols-outlined">logout</span>
             </a>
         </div>
     </nav>
@@ -85,8 +90,24 @@
         </div>
     </div>
 
+    <aside id="menuSidebar" class="sidebar menu-sidebar" aria-hidden="true">
+        <button class="sidebar-close" type="button" aria-label="ปิดเมนู">
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+        </button>
+        <div class="sidebar-content">
+            <h2 class="menu-title">เมนู</h2>
+            <a class="drawer-link" href="index.html">หน้าแรก</a>
+            <button class="drawer-link profile-drawer-toggle" type="button">โปรไฟล์</button>
+            <a class="drawer-link drawer-login-link" href="login.html">เข้าสู่ระบบ</a>
+            <button class="drawer-theme-toggle" type="button">
+                <span class="material-symbols-outlined" aria-hidden="true">light_mode</span>
+                <span>เปลี่ยนธีม</span>
+            </button>
+        </div>
+    </aside>
+
     <main>
-        <!-- เพิ่ม data-aos ตรงนี้เพื่อให้แถบกระจกเลื่อนขึ้นมาตอนเปิด -->
+        
         <div class="glass-panel" data-aos="fade-up">
             <section class="main-container">
                 <h2 class="main-title">ยินดีต้อนรับสู่เว็บเพจของฉัน</h2>
@@ -95,8 +116,8 @@
             </section>
             
 
-        <div class="content-row" data-aos="fade-up"> <!-- ให้มันเลื่อนขึ้นพร้อมกันทั้งแถว -->
-            <div class="sub-box"> <!-- กล่องนี้จะ Hover ได้อิสระแล้ว -->
+        <div class="content-row" data-aos="fade-up"> 
+            <div class="sub-box"> 
                 <h3>abcd</h3>
                 <p>6</p>
             </div>
@@ -120,8 +141,9 @@
 
     <footer><p>&copy; 2026 baross. All rights reserved.</p></footer>
 
-    <!-- 2. AOS JS (ต้องวางก่อน script module) -->
+    
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="theme.js"></script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
@@ -141,8 +163,8 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        // --- 1. ระบบสลับรูป (Carousel) ---
-        // ใช้ window. เพื่อให้ HTML มองเห็นฟังก์ชันที่อยู่ใน Module
+        
+        
         window.switchPhoto = function(el) {
             if (el.classList.contains('img-center')) return;
             const container = document.getElementById('photoStack');
@@ -155,7 +177,7 @@
                 center.classList.replace('img-center', currentClass);
                 el.classList.replace(currentClass, 'img-center');
                 
-                // เก็บ Log ลง Firebase
+                
                 push(ref(db, 'activity_logs/carousel'), { 
                     action: `สลับรูปไปที่ ${currentClass}`, 
                     time: new Date().toLocaleString() 
@@ -178,16 +200,16 @@
                 if (mainProfileImg) mainProfileImg.src = photoData;
                 if (navProfileImg) {
                     navProfileImg.src = photoData;
-                    navProfileImg.style.display = "inline-block";
+                    navProfileImg.hidden = false;
                 }
             } else {
                 if (mainProfileImg) mainProfileImg.src = "https://api.dicebear.com/7.x/avataaars/svg?seed=Baross";
-                if (navProfileImg) navProfileImg.style.display = "none";
+                if (navProfileImg) navProfileImg.hidden = true;
             }
         };
 
         const initApp = () => {
-            // 🔥 สำคัญ: สั่งให้ AOS ทำงาน
+            
             if (window.AOS) {
                 window.AOS.init({ duration: 1000, once: false });
             }
@@ -195,14 +217,48 @@
             const savedName = localStorage.getItem('savedUsername');
             const loginBtn = document.getElementById('login-btn');
             const sidebar = document.getElementById("mySidebar");
+            const menuSidebar = document.getElementById('menuSidebar');
+            const menuToggle = document.getElementById('menu-toggle');
+            const profileDrawerToggle = document.querySelector('.profile-drawer-toggle');
+            const drawerLoginLink = document.querySelector('.drawer-login-link');
             const uploadInput = document.getElementById('upload-photo');
+
+            const closeMenu = () => {
+                menuSidebar.classList.remove('is-open');
+                menuSidebar.setAttribute('aria-hidden', 'true');
+                menuToggle.setAttribute('aria-expanded', 'false');
+            };
+
+            menuToggle.onclick = () => {
+                const willOpen = !menuSidebar.classList.contains('is-open');
+                sidebar.classList.remove('is-open');
+                menuSidebar.classList.toggle('is-open', willOpen);
+                menuSidebar.setAttribute('aria-hidden', String(!willOpen));
+                menuToggle.setAttribute('aria-expanded', String(willOpen));
+            };
+
+            document.querySelector('.sidebar-close').onclick = closeMenu;
+            menuSidebar.querySelectorAll('.drawer-link').forEach((link) => {
+                link.addEventListener('click', closeMenu);
+            });
+
+            profileDrawerToggle.onclick = () => {
+                closeMenu();
+                if (savedName) {
+                    sidebar.classList.add('is-open');
+                } else {
+                    window.location.href = 'login.html';
+                }
+            };
 
             if (savedName) {
                 const userSpecificImg = localStorage.getItem('userProfilePic_' + savedName);
                 updateProfileUI(savedName, userSpecificImg);
+                drawerLoginLink.hidden = true;
 
                 loginBtn.onclick = (e) => {
                     e.preventDefault();
+                    closeMenu();
                     sidebar.classList.add('is-open');
                 };
                 document.getElementById('logout-btn').hidden = false;
@@ -228,6 +284,10 @@
                     if (!sidebar.contains(e.target) && !loginBtn.contains(e.target)) {
                         sidebar.classList.remove('is-open');
                     }
+                }
+                if (menuSidebar.classList.contains('is-open') &&
+                    !menuSidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                    closeMenu();
                 }
             };
         };

@@ -6,21 +6,21 @@
 
 body {
     background-image: url("img/Black White Abstract Wallpaper.jpg");
-    background-repeat: no-repeat; /*ไม่ให้รูปซ้ำ*/
-    background-size: cover; /*ช่วยให้แสดงรูปเต้ม*/
+    background-repeat: no-repeat; 
+    background-size: cover; 
     background-color: rgba(0, 0, 0, 0.265);
-    background-position: center; /*จัดตำแหน่งรูปให้อยู่ตรงกลาง*/
-    background-attachment: fixed; /*ทำให้รูปไม่เลื่อนตามหน้าเว็บ*/
+    background-position: center; 
+    background-attachment: fixed; 
     font-family: "Kanit", sans-serif;
     font-weight: 300;
 }
 
-/* .bix{
-    width: 200px;
-    height: 200px;
-    background-color: rgba(0, 255, 115, 0.8);
-    overflow: scroll; ทำให้มีแถบเลื่อน 
-}*/
+
+
+
+
+
+
 
 .bix {
     width: 200px;
@@ -43,7 +43,7 @@ p::first-line {
 
 
 
-.container {   /*กล่องหลัก */
+.container {   
     max-width: 960px;
     margin: 0 auto;
     background-color: rgba(117, 16, 225, 0.8);
@@ -52,11 +52,11 @@ p::first-line {
     right: 10px;
         left: 10px;
 }
-.box1 {    /*กล่องลูก1 */
+.box1 {    
     width: 100px;
     height: 100px;
     background-color: rgba(255, 255, 255, 0.8);
-    /* position: fixed; */
+    
     position: absolute;
     top: 10px;
     left: 10px;

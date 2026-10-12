@@ -5,7 +5,7 @@ const app = express();
 const port = Number(process.env.PORT) || 3000;
 const projectRoot = __dirname;
 
-// The HTML pages and assets live in the project root, alongside this file.
+
 app.use((req, res, next) => {
     const pathname = decodeURIComponent(req.path);
     if (
