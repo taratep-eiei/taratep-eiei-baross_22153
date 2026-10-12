@@ -215,7 +215,9 @@ html[data-theme="light"] .auth-theme-toggle {
     transform: translateX(-50%);
     background-color: #333;
     color: white;
-    padding: 20px 40px;
+    width: max-content;
+    max-width: calc(100vw - 32px);
+    padding: 20px 24px;
     border-radius: 15px;
     box-shadow: 0 10px 20px rgba(0,0,0,0.3);
     z-index: 10000;
