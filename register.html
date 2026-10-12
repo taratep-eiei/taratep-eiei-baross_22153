@@ -139,13 +139,15 @@
             console.error('Firebase registration failed:', error);
             const messageByCode = {
                 'auth/email-already-in-use': 'ชื่อนี้มีคนใช้แล้ว',
+                'auth/invalid-email': 'Firebase ไม่ยอมรับรูปแบบอีเมลที่สร้างจากชื่อผู้ใช้ กรุณาตรวจการตั้งค่า Firebase Authentication',
                 'auth/operation-not-allowed': 'โปรเจกต์ Firebase ยังไม่เปิด Email/Password ใน Authentication',
                 'auth/unauthorized-domain': 'โดเมนเว็บนี้ยังไม่ได้เพิ่มใน Firebase Authentication > Settings > Authorized domains',
                 'auth/network-request-failed': 'เชื่อมต่อ Firebase ไม่ได้ ตรวจอินเทอร์เน็ตและเปิดเว็บผ่าน localhost หรือ HTTPS',
                 'auth/invalid-api-key': 'Firebase API key ไม่ถูกต้อง กรุณาตรวจ firebaseConfig',
                 'auth/weak-password': 'รหัสผ่านไม่ผ่านข้อกำหนดของ Firebase'
             };
-            const message = messageByCode[error.code] || `สมัครไม่สำเร็จ (${error.code || 'unknown'})`;
+            const message = messageByCode[error.code] ||
+                `สมัครไม่สำเร็จ (${error.code || 'unknown'}): ${error.message || 'ไม่พบรายละเอียด error'}`;
             showCustomAlert(message, "error");
         }
     };
